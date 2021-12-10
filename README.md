@@ -1,6 +1,6 @@
 ![S.H.A.R Logo](resources/shar-logo.svg?raw=true "S.H.A.R Logo")
 
-# Usage Example
+# Example
 ```scala
 package de.pseifer.shar.example
 
@@ -31,3 +31,7 @@ import de.pseifer.shar.Shar
   println(notsub.show)
   println(reasoner.prove(notsub))
 ```
+
+# References
+
+[HermiT Reasoner](http://www.hermit-reasoner.com/)
