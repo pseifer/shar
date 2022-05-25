@@ -1,4 +1,3 @@
-![S.H.A.R Logo](resources/shar-logo.svg?raw=true "S.H.A.R Logo")
 <p align="center">
   <img width="768" height="320" src="resources/shar-logo.svg?raw=true">
 </p>
