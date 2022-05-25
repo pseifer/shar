@@ -4,6 +4,8 @@ import de.pseifer.shar.core.{
   ReasonerInitialization,
   EmptyInitialization,
   OntologyInitialization,
+  PrefixMapping,
+  BackendState,
   Iri
 }
 
@@ -46,6 +48,14 @@ class HermitReasoner(val initialization: ReasonerInitialization)
   // 'unsupported' (i.e., non-OWL-2-mapping) data types.
   private val reasonerConfig = Configuration()
   reasonerConfig.ignoreUnsupportedDatatypes = true
+
+  //reasonerConfig.blockingStrategyType =
+  //  Configuration.BlockingStrategyType.ANYWHERE
+  //reasonerConfig.existentialStrategyType =
+  //  Configuration.ExistentialStrategyType.CREATION_ORDER
+
+  //reasonerConfig.directBlockingType = Configuration.DirectBlockingType.PAIR_WISE
+
   private val hermit: Hermit = Hermit(reasonerConfig, ontology)
 
   // Flushing state to be optimized.
@@ -65,7 +75,20 @@ class HermitReasoner(val initialization: ReasonerInitialization)
           val l1 = if !ac.isEmpty then mkAxiomset(ac) else Set()
           val l2 = if !ad.isEmpty then mkAxiomset(ac) else Set()
           (Set(df.getOWLSubClassOfAxiom(cc, dd)) ++ l1 ++ l2).toList
-        case _ => List.empty
+        case Equality(c, d) =>
+          val (cc, ac) = convert(c)(AxiomSet.empty)
+          val (dd, ad) = convert(d)(AxiomSet.empty)
+          val l1 = if !ac.isEmpty then mkAxiomset(ac) else Set()
+          val l2 = if !ad.isEmpty then mkAxiomset(ac) else Set()
+          (Set(df.getOWLSubClassOfAxiom(cc, dd)) ++ Set(
+            df.getOWLSubClassOfAxiom(dd, cc)
+          ) ++ l1 ++ l2).toList
+        case Satisfiability(c) =>
+          val (cc, ac) = convert(c)(AxiomSet.empty)
+          val (dd, ad) = convert(Bottom)(AxiomSet.empty)
+          val l1 = if !ac.isEmpty then mkAxiomset(ac) else Set()
+          val l2 = if !ad.isEmpty then mkAxiomset(ac) else Set()
+          (Set(df.getOWLDisjointClassesAxiom(cc, dd)) ++ l1 ++ l2).toList
     }.toSet
 
   // Functionality.
@@ -109,10 +132,14 @@ class HermitReasoner(val initialization: ReasonerInitialization)
 
     val r = axiom match
       case Subsumption(c, d) => subsumed(c, d)
+      case Equality(c, d)    => equal(c, d)
       case Satisfiability(c) => satisfiable(c)
     r
 
   // Internal.
+
+  private def equal(c: Concept, d: Concept): Boolean =
+    subsumed(c, d) && subsumed(d, c)
 
   private def subsumed(c: Concept, d: Concept): Boolean =
     val (cc, ac) = convert(c)(AxiomSet.empty)
@@ -232,3 +259,9 @@ class HermitReasoner(val initialization: ReasonerInitialization)
         (model(_.getOWLObjectAllValuesFrom(convert(r), cc)), ac)
 
       case d: DerivedNumberRestriction => convert(d.toGreaterThan)
+
+object HermitReasoner:
+  def default: HermitReasoner =
+    val state: BackendState =
+      BackendState(EmptyInitialization, PrefixMapping.default)
+    HermitReasoner(state.reasonerInit)

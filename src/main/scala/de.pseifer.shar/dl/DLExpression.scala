@@ -20,3 +20,11 @@ trait DLExpression extends Encodeable:
   /** Default show is the same as encode. May be override where necessary.
     */
   def show(implicit state: BackendState): String = encode
+
+  /** The set of iris that represent concepts in this expression.
+    */
+  def concepts: Set[Iri]
+
+  /** The set of iris that represent properties in this expression.
+    */
+  def properties: Set[Iri]

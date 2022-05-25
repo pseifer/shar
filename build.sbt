@@ -4,7 +4,8 @@ lazy val root = project
   .in(file("."))
   .enablePlugins(Antlr4Plugin)
   .settings(
-    name := "Shar",
+    name := "shar",
+    organization := "de.pseifer",
     version := "0.1.0-SNAPSHOT",
     Antlr4 / antlr4Version := "4.7.2",
     Antlr4 / antlr4GenVisitor := true,

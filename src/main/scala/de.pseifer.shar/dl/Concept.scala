@@ -9,7 +9,9 @@ import de.pseifer.shar.error._
 
 /** A description logics concept.
   */
-sealed trait Concept extends DLExpression
+sealed trait Concept extends DLExpression:
+  def concepts: Set[Iri] = Set()
+  def properties: Set[Iri] = Set()
 
 /** ⊤
   */
@@ -27,6 +29,8 @@ final case class NamedConcept(c: Iri) extends Concept:
   def encode: String = c.encode
   override def show(implicit state: BackendState): String = c.show(state)
 
+  override def concepts: Set[Iri] = Set(c)
+
 /** ¬ 'concept'
   */
 final case class Complement(concept: Concept) extends Concept:
@@ -36,6 +40,8 @@ final case class Complement(concept: Concept) extends Concept:
   )
   private def format(inner: String): String =
     "¬(" + inner + ")"
+
+  override def concepts: Set[Iri] = concept.concepts
 
 /** {<'name'>}
   */
@@ -59,6 +65,8 @@ final case class ConceptWithContext(defined: Concept, context: AxiomSet)
   def encode: String = defined.encode ++ " @ ( " + context.encode + " )"
   override def show(implicit state: BackendState): String = encode
 
+  override def concepts: Set[Iri] = defined.concepts
+
 /** 'lhs' ⊔ 'rhs'
   */
 final case class Union(lhs: Concept, rhs: Concept) extends Concept:
@@ -67,6 +75,9 @@ final case class Union(lhs: Concept, rhs: Concept) extends Concept:
     format(lhs.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
     "(" ++ left ++ ")⊔(" ++ right ++ ")"
+
+  override def concepts: Set[Iri] = lhs.concepts.union(rhs.concepts)
+  override def properties: Set[Iri] = lhs.properties.union(rhs.properties)
 
 /** 'lhs' ⊓ 'rhs'
   */
@@ -77,12 +88,17 @@ final case class Intersection(lhs: Concept, rhs: Concept) extends Concept:
   private def format(left: String, right: String): String =
     "(" ++ left ++ ")⊓(" ++ right ++ ")"
 
+  override def concepts: Set[Iri] = lhs.concepts.union(rhs.concepts)
+  override def properties: Set[Iri] = lhs.properties.union(rhs.properties)
+
 /** Base form of number restrictions for derived forms. Derived forms are kept
   * at some stages to keep user representation identical, but all
   * NumberRestrictions can be transformed to a basic GreaterThan form.
   */
 trait DerivedNumberRestriction extends Concept:
   def toGreaterThan: Concept
+  override def concepts: Set[Iri] = this.toGreaterThan.concepts
+  override def properties: Set[Iri] = this.toGreaterThan.properties
 
 /** >=n 'role' . 'rhs' Number restriction
   */
@@ -93,6 +109,9 @@ final case class GreaterThan(n: Int, role: Role, rhs: Concept) extends Concept:
     format(role.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
     ">=" ++ n.toString ++ " " ++ left ++ "." + right
+
+  override def concepts: Set[Iri] = rhs.concepts
+  override def properties: Set[Iri] = role.properties
 
 /** <=n 'role' . 'rhs' Number restriction
   */

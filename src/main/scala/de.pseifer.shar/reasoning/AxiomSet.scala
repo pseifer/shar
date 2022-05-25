@@ -17,15 +17,22 @@ class AxiomSet(private val axioms: Set[Axiom])
   def isEmpty: Boolean = axioms.isEmpty
   def getAxiomSeq: Seq[Axiom] = axioms.toSeq
 
+  def concepts: Set[Iri] = axioms.flatMap(_.concepts).toSet
+  def properties: Set[Iri] = axioms.flatMap(_.properties).toSet
+
   def encode: String = axioms.map(_.encode).mkString(" ")
   override def show(implicit state: BackendState): String =
-    axioms.map(_.show(state)).mkString("\n")
+    axioms.map(_.show(state)).mkString(", ")
+
+  def show(token: String)(implicit state: BackendState): String =
+    axioms.map(_.show(state)).mkString(token)
 
   def map(f: Concept => Concept): AxiomSet =
     AxiomSet(axioms.map { m =>
       m match
         case Subsumption(c, d) => Subsumption(f(c), f(d))
-        case a                 => a
+        case Equality(c, d)    => Equality(f(c), f(d))
+        case Satisfiability(c) => Satisfiability(f(c))
     })
 
   def canEqual(a: Any) = a.isInstanceOf[AxiomSet]

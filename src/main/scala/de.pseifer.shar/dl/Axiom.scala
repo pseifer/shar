@@ -20,16 +20,36 @@ case class Subsumption(c: Concept, d: Concept) extends Axiom:
     c.show(state) ++ " ⊑ " ++ d.show(state)
   def encode: String = c.encode ++ " :<= " ++ d.encode
 
+  def concepts: Set[Iri] = c.concepts.union(d.concepts)
+  def properties: Set[Iri] = c.properties.union(d.properties)
+
 object Subsumption:
   def orElse(expr: DLExpression, error: SharError): SharTry[Subsumption] =
     expr match
       case a: Subsumption => Right(a)
       case _              => Left(error)
 
+case class Equality(c: Concept, d: Concept) extends Axiom:
+  override def show(implicit state: BackendState): String =
+    c.show(state) ++ " ≡ " ++ d.show(state)
+  def encode: String = c.encode ++ " === " ++ d.encode
+
+  def concepts: Set[Iri] = c.concepts.union(d.concepts)
+  def properties: Set[Iri] = c.properties.union(d.properties)
+
+object Equality:
+  def orElse(expr: DLExpression, error: SharError): SharTry[Equality] =
+    expr match
+      case a: Equality => Right(a)
+      case _           => Left(error)
+
 case class Satisfiability(c: Concept) extends Axiom:
   override def show(implicit state: BackendState): String =
     c.show(state) ++ " ≢ " ++ Bottom.show(state)
   def encode: String = c.encode
+
+  def concepts: Set[Iri] = c.concepts
+  def properties: Set[Iri] = c.properties
 
 object Satisfiability:
   def orElse(expr: DLExpression, error: SharError): SharTry[Satisfiability] =
