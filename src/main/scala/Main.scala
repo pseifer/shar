@@ -1,29 +1,23 @@
 package de.pseifer.shar
 
-import de.pseifer.shar.dl._
-import de.pseifer.shar.reasoning._
-
 import de.pseifer.shar.Shar
 
-@main def miniSharExample: Unit =
+val shar = Shar()
+import shar._
 
-  val shar = Shar()
-  import shar._
+@main def example: Unit =
 
-  reasoner.addAxioms(
-    AxiomSet(
-      Set(
-        Subsumption(":NiceChild", ":Child"),
-        Subsumption(":Child", ":Person"),
-        Subsumption(":Person", ":Agent")
-      )
-    )
-  )
+  val example = K += {
+    ":NiceChild" ⊑ (":Child" ⊓ ":Nice")
+    ":Child" ⊑ ":Person"
+    ":Person" ⊑ ":Agent"
+  }
 
-  val sub = Subsumption(":NiceChild & :Person", ":Agent")
-  println(sub.show)
-  println(reasoner.prove(sub))
+  example += {
+    ":Dog" ⊑ ":Agent"
+    ":Person" ⊑ (∃(":knows") o ":Person")
+  }
 
-  val notsub = Subsumption(":Agent", ":NiceChild")
-  println(notsub.show)
-  println(reasoner.prove(notsub))
+  example.show
+
+  example |- { ((∃(":knows") o ":NiceChild") ⊓ ":Dog") ⊑ ":Agent" }
