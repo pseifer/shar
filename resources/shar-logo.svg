@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="276.5589mm"
+   width="280.5589mm"
    height="71.550171mm"
-   viewBox="0 0 276.5589 71.550171"
+   viewBox="0 0 280.5589 71.550171"
    version="1.1"
    id="svg4551"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
@@ -27,7 +27,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
      inkscape:cx="530.35148"
-     inkscape:cy="-52.773885"
+     inkscape:cy="-52.773875"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -39,7 +39,7 @@
      showguides="false"
      fit-margin-top="1"
      fit-margin-left="1"
-     fit-margin-right="1"
+     fit-margin-right="5"
      fit-margin-bottom="1" />
   <metadata
      id="metadata4548">
