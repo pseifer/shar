@@ -8,23 +8,23 @@ Shar features a collection of abstract data types for description logic expressi
 
 # DSL
 
-The Shar DSL can be used by instantiating ```Shar()``` and importing the instance. 
+The Shar DSL can be used by instantiating ```Shar()``` and importing the instance.
 
-https://github.com/pseifer/shar/blob/2f0389cbd43db41d33c8ff870a1e8a9a1a388392/src/main/scala/Main.scala#L3-L6
+https://github.com/pseifer/shar/blob/2ea01463513c1ae7af41f4855ba670cb644703a0/examples/Main.scala#L3-L6
 
 We can now construct a knowledge base and add several axioms:
 
-https://github.com/pseifer/shar/blob/2f0389cbd43db41d33c8ff870a1e8a9a1a388392/src/main/scala/Main.scala#L10-L17
+https://github.com/pseifer/shar/blob/2ea01463513c1ae7af41f4855ba670cb644703a0/examples/Main.scala#L10-L17
 
 There are various ways of constructing axioms and concept expressions, including the Unicode operators used in this example. Note, that in some instances and due to the operator precedence rules in Scala, additional parentheses are required. Additionally, there are ASCII-only alternative operators (including ```&, |, E, A, >>=, ===, |-``` and ```+=```). Concept expressions can also be parsed in their entirety from Strings, where again full Unicode and ASCII variants exists (see also this [grammar](https://github.com/pseifer/shar/blob/main/src/main/antlr4/DescriptionLogics.g4)). For the sake of simplicity, parsing of IRIs fails with runtime exceptions in the DSL. When using the full ```Shar``` API (see below), proper error handling via ```Try``` is available.
 
 While there is also a default knowledge base (accessible by using operators without left-hand-side arguments), using explicitly named knowledge bases is preferrable. Thus, we can construct another knowledge base and then use the union of both knowledge bases for checking entailment of an axiom: 
 
-https://github.com/pseifer/shar/blob/2f0389cbd43db41d33c8ff870a1e8a9a1a388392/src/main/scala/Main.scala#L19-L28
+https://github.com/pseifer/shar/blob/2ea01463513c1ae7af41f4855ba670cb644703a0/examples/Main.scala#L19-L28
 
 By default, using the entailment operator prints the axiom and result (in addition to returning the result as a boolean value). Supplying the argument ```noisy=false``` to the ```Shar``` constructor disables this behaviour. A knowledge base can be printed via ```.show```. The DSL also offers functions ```show(s: String*)``` and ```showfocus(s: String*)``` for formatting text output in-between knowledge bases and entailments.
 
-https://github.com/pseifer/shar/blob/2f0389cbd43db41d33c8ff870a1e8a9a1a388392/src/main/scala/Main.scala#L30-L31
+https://github.com/pseifer/shar/blob/2ea01463513c1ae7af41f4855ba670cb644703a0/examples/Main.scala#L30-L31
 
 Further configuration allows importing ontologies (```init: ReasonerInitilization```) and predefining additional prefixes (```prefixes: PrefixMapping```) via the ```Shar``` constructor. 
 
