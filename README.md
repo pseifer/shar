@@ -22,7 +22,7 @@ While there is also a default knowledge base (accessible by using operators with
 
 https://github.com/pseifer/shar/blob/2f0389cbd43db41d33c8ff870a1e8a9a1a388392/src/main/scala/Main.scala#L19-L28
 
-By default, using the entailment operator prints the axiom and result (in addition to returning the result as a boolean value). Supplying the argument ```noisy=false``` to the ```Shar``` constructor disables this behaviour. A knowledge base can be printed via:
+By default, using the entailment operator prints the axiom and result (in addition to returning the result as a boolean value). Supplying the argument ```noisy=false``` to the ```Shar``` constructor disables this behaviour. A knowledge base can be printed via ```.show```. The DSL also offers functions ```show(s: String*)``` and ```showfocus(s: String*)``` for formatting text output in-between knowledge bases and entailments.
 
 https://github.com/pseifer/shar/blob/2f0389cbd43db41d33c8ff870a1e8a9a1a388392/src/main/scala/Main.scala#L30-L31
 
@@ -48,7 +48,14 @@ TBD
 
 # REPL
 
-TBD
+For now, the ```Shar``` REPL consists of the standard Scala console. A session can be started via
+
+```sh
+sbt console
+scala> :load repl.scala
+```
+
+On Windows Systems, you may want to use ```chcp 65001``` for UTF-8 support.
 
 # References
 
