@@ -16,15 +16,15 @@ import de.pseifer.shar.reasoning.{AxiomSet, DLReasoner}
   * @param state
   *   (implicit) BackendState
   */
-case class ReasonerReference(name: String, re: DLReasoner, noisy: Boolean)(
-    implicit state: BackendState
+case class KnowledgeBase(name: String, re: DLReasoner, noisy: Boolean)(implicit
+    state: BackendState
 ):
 
   /** Prove an axiom. */
   def prove(a: Axiom): Boolean = re.prove(a)
 
   /** Join with custom new name 'rename'. */
-  def join(ok: ReasonerReference, rename: String): ReasonerReference =
+  def join(ok: KnowledgeBase, rename: String): KnowledgeBase =
     //val newr = ReasonerReference(rename, reasoner(state.reasonerInit))
     val newr = this.copy(name = rename)
     newr.addAxioms(this.axioms)
@@ -32,47 +32,47 @@ case class ReasonerReference(name: String, re: DLReasoner, noisy: Boolean)(
     newr
 
   /** Join with custom new name 'rename'. */
-  def ∪(ok: ReasonerReference, rename: String): ReasonerReference =
+  def ∪(ok: KnowledgeBase, rename: String): KnowledgeBase =
     join(ok, rename)
 
   /** Join with default name. */
-  def join(ok: ReasonerReference): ReasonerReference =
+  def join(ok: KnowledgeBase): KnowledgeBase =
     join(ok, this.name ++ " + " ++ ok.name)
 
   /** Join with default name. */
-  def ∪(ok: ReasonerReference): ReasonerReference = join(ok)
+  def ∪(ok: KnowledgeBase): KnowledgeBase = join(ok)
 
-  /** Add axioms to the reasoner. */
-  def +=(as: AxiomSetBuilder): ReasonerReference =
+  /** Add axioms to the knowledge base. */
+  def +=(as: AxiomSetBuilder): KnowledgeBase =
     this.addAxioms(AxiomSet(as.toSet))
     this
 
-  /** Add axioms to the reasoner. */
-  def ⩲(as: AxiomSetBuilder): ReasonerReference = +=(as)
+  /** Add axioms to the knowledge base. */
+  def ⩲(as: AxiomSetBuilder): KnowledgeBase = +=(as)
 
-  /** Entailment. */
+  /** Test entailment for the knowledge base. Print if noisy is set. */
   def |-(as: AxiomSetBuilder): Boolean =
     val b = as.toSet.map(doEntails(this, _, out = noisy)).forall(_ == true)
     if noisy then println("")
     b
 
-  /** Entailment. */
+  /** Test entailment for the knowledge base. Print if noisy is set. */
   def ⊢(as: AxiomSetBuilder): Boolean = |-(as)
 
-  /** Entailment (and always print). */
+  /** Test entailment for the knowledge base. Always prints. */
   def |-!(as: AxiomSetBuilder): Boolean =
     val b = as.toSet.map(doEntails(this, _, out = true)).forall(_ == true)
     println("")
     b
 
-  /** Entailment (and always print). */
+  /** Test entailment for the knowledge base. Always prints. */
   def ⊩(as: AxiomSetBuilder): Boolean = |-!(as)
 
-  /** Pretty print. */
+  /** Print the default base. */
   def show: Unit = println(this.toString)
 
   /** Check for entailment and output results (if out is set). */
-  private def doEntails(r: ReasonerReference, a: Axiom, out: Boolean): Boolean =
+  private def doEntails(r: KnowledgeBase, a: Axiom, out: Boolean): Boolean =
     if out then
       print(r.name)
       print(" ⊢ ")
@@ -95,4 +95,4 @@ case class ReasonerReference(name: String, re: DLReasoner, noisy: Boolean)(
       axioms.show("\n") ++
       s"\n---${List.fill(name.size)("-").mkString("")}---\n"
 
-end ReasonerReference
+end KnowledgeBase

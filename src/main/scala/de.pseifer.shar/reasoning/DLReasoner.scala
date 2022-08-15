@@ -1,6 +1,7 @@
 package de.pseifer.shar.reasoning
 
 import de.pseifer.shar.dl.Axiom
+import de.pseifer.shar.core.ReasonerInitialization
 
 /** A description logics reasoner, that can prove axioms.
   *
@@ -11,7 +12,7 @@ import de.pseifer.shar.dl.Axiom
   * @see
   *   Role
   */
-trait DLReasoner:
+trait DLReasoner(initialization: ReasonerInitialization):
 
   /** Prove the axiom 'Axiom'. Optionally accepts a List of additional axioms
     * used as a context. The context is added to the ontology before prooving
@@ -19,8 +20,8 @@ trait DLReasoner:
     */
   def prove(axiom: Axiom): Boolean
 
-  /** Add axiom set. */
+  /** Add an axiom set. */
   def addAxioms(axioms: AxiomSet): Unit
 
-  /** Add axiom. */
-  def addAxiom(axiom: Axiom): Unit
+  /** Add a single axiom. */
+  def addAxiom(axiom: Axiom): Unit = addAxioms(AxiomSet(Set(axiom)))

@@ -26,7 +26,7 @@ import java.io.File
 /** A DL reasoner that uses HermiT internally.
   */
 class HermitReasoner(val initialization: ReasonerInitialization)
-    extends DLReasoner:
+    extends DLReasoner(initialization):
 
   // TODO: Wrap internal in a flush-state dependent thing.
 
@@ -106,9 +106,6 @@ class HermitReasoner(val initialization: ReasonerInitialization)
     } catch {
       case e: Exception => false
     }
-
-  def addAxiom(axiom: Axiom): Unit =
-    addAxioms(AxiomSet(Set(axiom)))
 
   def addAxioms(axioms: AxiomSet): Unit =
     if !axioms.isEmpty then

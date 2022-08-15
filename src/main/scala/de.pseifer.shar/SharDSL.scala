@@ -6,17 +6,25 @@ import de.pseifer.shar.error._
 import de.pseifer.shar.reasoning._
 import de.pseifer.shar.parsing._
 
-// DSL for description logic knowledgebases.
-class Shar(
-    // Initialization (e.g., ontology) for the reasoner.
+/** A DSL for description logic knowledgebases.
+  *
+  * @param init
+  *   a custom reasoner initialization (e.g., ontology IRI).
+  * @param prefixes
+  *   a custom, predefined prefix mapping
+  * @param reasoner
+  *   constructor for a `DLReasoner`; only required if custom instance of
+  *   `DLReasoner` is defined
+  * @param defaultIsSharPrefix
+  *   use the prefix 'shar:' as default (':')
+  * @param noisy
+  *   Always output to stdout (e.g., for entailment ⊢)
+  */
+class SharDSL(
     init: ReasonerInitialization = EmptyInitialization,
-    // Prefix mapping.
     prefixes: PrefixMapping = PrefixMapping.default,
-    // Constructor for a reasoner of type DLReasoner.
     reasoner: ReasonerInitialization => DLReasoner = HermitReasoner(_),
-    // Use ':' for a build-in default 'shar:' prefix.
     defaultIsSharPrefix: Boolean = true,
-    // Controlls, whether certain DSL expressions output to stdout.
     noisy: Boolean = true
 ):
 
@@ -28,7 +36,7 @@ class Shar(
 
   // The default reasoner.
   val defaultReasoner =
-    ReasonerReference("K", reasoner(state.reasonerInit), noisy)
+    KnowledgeBase("K", reasoner(state.reasonerInit), noisy)
 
   // Counter for unnamed reasoners.
   private var counter = 0
@@ -44,30 +52,43 @@ class Shar(
 
   // Extensions for building subsumption and equivalence axioms.
   extension (c: Concept) {
+
+    /** Subsumption axiom constructed from two concept expressions. */
     def ⊑(d: Concept)(implicit asb: AxiomSetBuilder): AxiomSetBuilder = <<=(d)
 
+    /** Subsumption axiom constructed from two concept expressions. */
     def <<=(d: Concept)(implicit asb: AxiomSetBuilder): AxiomSetBuilder =
       asb.add(Subsumption(c, d))
 
+    /** Equality axiom constructed from two concept expressions. */
     def ≡(d: Concept)(implicit asb: AxiomSetBuilder): AxiomSetBuilder = ===(d)
 
+    /** Equality axiom constructed from two concept expressions. */
     def ===(d: Concept)(implicit asb: AxiomSetBuilder): AxiomSetBuilder =
       asb.add(Equality(c, d))
   }
 
   // == Concept DLS ==
 
-  // Top and Bottom.
+  /** Top */
   val ⊤ = Top
+
+  /** Bottom */
   val ⊥ = Bottom
 
   // Construct concepts from Concept with infix notation.
   extension (c: Concept) {
-    // Intersection
+
+    /** Concept intersection. */
     def ⊓(d: Concept): Concept = Intersection(c, d)
+
+    /** Concept intersection. */
     def &(d: Concept): Concept = Intersection(c, d)
-    // Union
+
+    /** Concept union. */
     def ⊔(d: Concept): Concept = Union(c, d)
+
+    /** Concept union. */
     def |(d: Concept): Concept = Union(c, d)
   }
 
@@ -80,7 +101,11 @@ class Shar(
 
   // Tagged role and Concept construct Existential/Universal.
   extension (t: TaggedRole) {
+
+    /** ...to concept... */
     def ∘(c: Concept): Concept = o(c)
+
+    /** ...to concept... */
     def o(c: Concept): Concept =
       t match
         case TaggedRole.ER(r) => Existential(r, c)
@@ -88,52 +113,83 @@ class Shar(
   }
 
   // Variants of prefix operators for existential quantification.
+
+  /** Existential quantification over role... */
   def ∃(r: Iri): TaggedRole = Exists(r)
+
+  /** Inverse existential quantification over role... */
   def ∃-(r: Iri): TaggedRole = InverseExists(r)
+
+  /** Existential quantification over role... */
   def E(r: Iri): TaggedRole = Exists(r)
+
+  /** Inverse existential quantification over role... */
   def Ei(r: Iri): TaggedRole = InverseExists(r)
 
+  /** Existential quantification over role... */
   def Exists(r: Iri): TaggedRole =
     TaggedRole.ER(NamedRole(r))
 
+  /** Inverse existential quantification over role... */
   def InverseExists(r: Iri): TaggedRole =
     TaggedRole.ER(Inverse(NamedRole(r)))
 
-  // Variants of prefix operators for universal quantification.
+  /** Universal quantification over role... */
   def ∀(r: Iri): TaggedRole = Forall(r)
+
+  /** Inverse universal quantification over role... */
   def ∀-(r: Iri): TaggedRole = InverseForall(r)
+
+  /** Universal quantification over role... */
   def A(r: Iri): TaggedRole = Forall(r)
+
+  /** Inverse universal quantification over role... */
   def Ai(r: Iri): TaggedRole = InverseForall(r)
 
+  /** Universal quantification over role... */
   def Forall(r: Iri): TaggedRole =
     TaggedRole.FR(NamedRole(r))
 
+  /** Inverse universal quantification over role... */
   def InverseForall(r: Iri): TaggedRole =
     TaggedRole.FR(Inverse(NamedRole(r)))
 
   // == Knowledge Base DSL ==
 
-  // Define a new reasoner.
-  def K(name: String): ReasonerReference =
-    ReasonerReference(name, reasoner(state.reasonerInit), noisy)
+  /** Define a new knowledge base with ```name```. */
+  def K(name: String): KnowledgeBase =
+    KnowledgeBase(name, reasoner(state.reasonerInit), noisy)
 
-  // Define a new reasoner (default name).
-  def K: ReasonerReference =
+  /** Define a new knowledge base with (fresh) name Kn. */
+  def K: KnowledgeBase =
     counter += 1
-    ReasonerReference(
+    KnowledgeBase(
       "K" ++ counter.toString,
       reasoner(state.reasonerInit),
       noisy
     )
 
-  // == ReasonerReference API on defaultReasoner ==
+  // == KnowledgeBase API on defaultReasoner ==
 
-  def +=(as: AxiomSetBuilder): ReasonerReference = defaultReasoner += as
-  def ⩲(as: AxiomSetBuilder): ReasonerReference = +=(as)
+  /** Add axioms to the default knowledge base. */
+  def +=(as: AxiomSetBuilder): KnowledgeBase = defaultReasoner += as
+
+  /** Add axioms to the default knowledge base. */
+  def ⩲(as: AxiomSetBuilder): KnowledgeBase = +=(as)
+
+  /** Test entailment for the default knowledge base. Print if noisy is set. */
   def |-(as: AxiomSetBuilder): Boolean = defaultReasoner |- as
+
+  /** Test entailment for the default knowledge base. Print if noisy is set. */
   def ⊢(as: AxiomSetBuilder): Boolean = |-(as)
+
+  /** Test entailment for the default knowledge base. Always prints. */
   def !|-(as: AxiomSetBuilder): Boolean = defaultReasoner |-! as
+
+  /** Test entailment for the default knowledge base. Always prints. */
   def ⊩(as: AxiomSetBuilder): Boolean = !|-(as)
+
+  /** Print the default knowledge base. */
   def show(): Unit = defaultReasoner.show
 
   // == IO Utility ==
@@ -143,11 +199,18 @@ class Shar(
     println(s)
     if break then println("")
 
+  /** Print a string. */
   def show(s: String): Unit = doshow(s, 0, true)
+
+  /** Print mutliple strings. */
   def show(s: String*): Unit =
     s.foreach(doshow(_, 0, false))
     println("")
+
+  /** Print a string indented. */
   def showfocus(s: String): Unit = doshow(s, 1, true)
+
+  /** Print multiple strings indented. */
   def showfocus(s: String*): Unit =
     s.foreach(doshow(_, 1, false))
     println("")

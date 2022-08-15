@@ -1,8 +1,8 @@
 package de.pseifer.shar
 
-import de.pseifer.shar.Shar
+import de.pseifer.shar.SharDSL
 
-val shar = Shar()
+val shar = SharDSL()
 import shar._
 
 @main def example: Unit =
@@ -23,7 +23,7 @@ import shar._
   }
 
   // Entailment of an axiom in the union of "C" and "A".
-  (c ∪ a) ⊢ {
+  c ∪ a ⊢ {
     ":NiceChild" ⊑ (∃(":knows") ∘ ":Agent")
   }
 
