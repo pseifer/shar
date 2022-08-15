@@ -7,17 +7,25 @@ import shar._
 
 @main def example: Unit =
 
-  val example = K += {
+  // Create a new knowledge base called "C".
+  val c = K("C")
+
+  // Add some axioms.
+  c ⩲ {
     ":NiceChild" ⊑ (":Child" ⊓ ":Nice")
     ":Child" ⊑ ":Person"
+  }
+
+  // Another knowledge base, called "A".
+  val a = K("A") ⩲ {
     ":Person" ⊑ ":Agent"
+    ":Agent" ⊑ (∃(":knows") ∘ ":Agent")
   }
 
-  example += {
-    ":Dog" ⊑ ":Agent"
-    ":Person" ⊑ (∃(":knows") o ":Person")
+  // Entailment of an axiom in the union of "C" and "A".
+  (c ∪ a) ⊢ {
+    ":NiceChild" ⊑ (∃(":knows") ∘ ":Agent")
   }
 
-  example.show
-
-  example |- { ((∃(":knows") o ":NiceChild") ⊓ ":Dog") ⊑ ":Agent" }
+  // Print axioms in the knowledge base "C".
+  c.show
