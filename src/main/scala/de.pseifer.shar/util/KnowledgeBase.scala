@@ -3,6 +3,7 @@ package de.pseifer.shar
 import de.pseifer.shar.core.BackendState
 import de.pseifer.shar.dl.Axiom
 import de.pseifer.shar.reasoning.{AxiomSet, DLReasoner}
+import de.pseifer.shar.core.ReasonerInitialization
 
 /** A small wrapper around a reasoner, keeping track of a name and the set of
   * axioms (in AxiomSet representation).
@@ -16,7 +17,12 @@ import de.pseifer.shar.reasoning.{AxiomSet, DLReasoner}
   * @param state
   *   (implicit) BackendState
   */
-case class KnowledgeBase(name: String, re: DLReasoner, noisy: Boolean)(implicit
+case class KnowledgeBase(
+    name: String,
+    re: DLReasoner,
+    noisy: Boolean,
+    reasoner: ReasonerInitialization => DLReasoner
+)(implicit
     state: BackendState
 ):
 
@@ -25,8 +31,8 @@ case class KnowledgeBase(name: String, re: DLReasoner, noisy: Boolean)(implicit
 
   /** Join with custom new name 'rename'. */
   def join(ok: KnowledgeBase, rename: String): KnowledgeBase =
-    //val newr = ReasonerReference(rename, reasoner(state.reasonerInit))
-    val newr = this.copy(name = rename)
+    val newr =
+      KnowledgeBase(rename, reasoner(state.reasonerInit), noisy, reasoner)
     newr.addAxioms(this.axioms)
     newr.addAxioms(ok.axioms)
     newr

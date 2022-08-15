@@ -34,9 +34,12 @@ class SharDSL(
   // Implicit builder for axioms.
   implicit val axiomSetBuilder: AxiomSetBuilder = AxiomSetBuilder()
 
+  // Make a KnowledgeBase with a name and standard setup.
+  private def mkKB(name: String) =
+    KnowledgeBase(name, reasoner(state.reasonerInit), noisy, reasoner)
+
   // The default reasoner.
-  val defaultReasoner =
-    KnowledgeBase("K", reasoner(state.reasonerInit), noisy)
+  val defaultReasoner = mkKB("K")
 
   // Counter for unnamed reasoners.
   private var counter = 0
@@ -157,17 +160,12 @@ class SharDSL(
   // == Knowledge Base DSL ==
 
   /** Define a new knowledge base with ```name```. */
-  def K(name: String): KnowledgeBase =
-    KnowledgeBase(name, reasoner(state.reasonerInit), noisy)
+  def K(name: String): KnowledgeBase = mkKB(name)
 
   /** Define a new knowledge base with (fresh) name Kn. */
   def K: KnowledgeBase =
     counter += 1
-    KnowledgeBase(
-      "K" ++ counter.toString,
-      reasoner(state.reasonerInit),
-      noisy
-    )
+    mkKB("K" ++ counter.toString)
 
   // == KnowledgeBase API on defaultReasoner ==
 
