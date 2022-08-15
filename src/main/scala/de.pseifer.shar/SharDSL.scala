@@ -192,26 +192,19 @@ class SharDSL(
 
   // == IO Utility ==
 
-  private def doshow(s: String, level: Int, break: Boolean): Unit =
-    print(List.fill(level * 2)(" ").mkString(""))
+  private def doshow(s: String, level: Int): Unit =
+    print(List.fill(level)(" ").mkString(""))
     println(s)
-    if break then println("")
 
-  /** Print a string. */
-  def show(s: String): Unit = doshow(s, 0, true)
-
-  /** Print mutliple strings. */
+  /** Print strings. */
   def show(s: String*): Unit =
-    s.foreach(doshow(_, 0, false))
-    println("")
+    s.foreach(doshow(_, 0))
+    if s.nonEmpty then println("")
 
-  /** Print a string indented. */
-  def showfocus(s: String): Unit = doshow(s, 1, true)
-
-  /** Print multiple strings indented. */
+  /** Print strings indented. */
   def showfocus(s: String*): Unit =
-    s.foreach(doshow(_, 1, false))
-    println("")
+    s.foreach(doshow(_, 2))
+    if s.nonEmpty then println("")
 
   // == Implicit conversions ==
 

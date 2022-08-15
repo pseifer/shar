@@ -74,8 +74,13 @@ case class KnowledgeBase(
   /** Test entailment for the knowledge base. Always prints. */
   def ⊩(as: AxiomSetBuilder): Boolean = |-!(as)
 
-  /** Print the default base. */
-  def show: Unit = println(this.toString)
+  /** Print the knowledge base. */
+  def show: Unit = println(this.toString ++ "\n")
+
+  override def toString: String =
+    s"-- $name --\n" ++
+      axioms.show("\n") ++
+      s"\n---${List.fill(name.size)("-").mkString("")}---"
 
   /** Check for entailment and output results (if out is set). */
   private def doEntails(r: KnowledgeBase, a: Axiom, out: Boolean): Boolean =
@@ -95,10 +100,5 @@ case class KnowledgeBase(
   private def addAxioms(as: AxiomSet): Unit =
     axioms = axioms.join(as)
     re.addAxioms(as)
-
-  override def toString: String =
-    s"-- $name --\n" ++
-      axioms.show("\n") ++
-      s"\n---${List.fill(name.size)("-").mkString("")}---\n"
 
 end KnowledgeBase
