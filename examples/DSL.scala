@@ -14,17 +14,20 @@ import shar._
   c ⩲ {
     ":NiceChild" ⊑ (":Child" ⊓ ":Nice")
     ":Child" ⊑ ":Person"
+    ::
   }
 
   // Another knowledge base, called "A".
   val a = K("A") ⩲ {
     ":Person" ⊑ ":Agent"
     ":Agent" ⊑ (∃(":knows") ∘ ":Agent")
+    ::
   }
 
   // Entailment of an axiom in the union of "C" and "A".
   c ∪ a ⊢ {
     ":NiceChild" ⊑ (∃(":knows") ∘ ":Agent")
+    ::
   }
 
   // Print axioms in the knowledge base "C".

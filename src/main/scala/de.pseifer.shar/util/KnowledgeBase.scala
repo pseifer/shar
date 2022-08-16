@@ -31,11 +31,9 @@ case class KnowledgeBase(
 
   /** Join with custom new name 'rename'. */
   def join(ok: KnowledgeBase, rename: String): KnowledgeBase =
-    val newr =
-      KnowledgeBase(rename, reasoner(state.reasonerInit), noisy, reasoner)
-    newr.addAxioms(this.axioms)
-    newr.addAxioms(ok.axioms)
-    newr
+    KnowledgeBase(rename, reasoner(state.reasonerInit), noisy, reasoner)
+      .addAxioms(this.axioms)
+      .addAxioms(ok.axioms)
 
   /** Join with custom new name 'rename'. */
   def ∪(ok: KnowledgeBase, rename: String): KnowledgeBase =
@@ -49,30 +47,30 @@ case class KnowledgeBase(
   def ∪(ok: KnowledgeBase): KnowledgeBase = join(ok)
 
   /** Add axioms to the knowledge base. */
-  def +=(as: AxiomSetBuilder): KnowledgeBase =
-    this.addAxioms(AxiomSet(as.toSet))
-    this
+  def +=(as: AxiomSet): KnowledgeBase =
+    this.addAxioms(as)
 
   /** Add axioms to the knowledge base. */
-  def ⩲(as: AxiomSetBuilder): KnowledgeBase = +=(as)
+  def ⩲(as: AxiomSet): KnowledgeBase = +=(as)
 
   /** Test entailment for the knowledge base. Print if noisy is set. */
-  def |-(as: AxiomSetBuilder): Boolean =
-    val b = as.toSet.map(doEntails(this, _, out = noisy)).forall(_ == true)
+  def |-(as: AxiomSet): Boolean =
+    val b =
+      as.getAxiomSeq.map(doEntails(this, _, out = noisy)).forall(_ == true)
     if noisy then println("")
     b
 
   /** Test entailment for the knowledge base. Print if noisy is set. */
-  def ⊢(as: AxiomSetBuilder): Boolean = |-(as)
+  def ⊢(as: AxiomSet): Boolean = |-(as)
 
   /** Test entailment for the knowledge base. Always prints. */
-  def |-!(as: AxiomSetBuilder): Boolean =
-    val b = as.toSet.map(doEntails(this, _, out = true)).forall(_ == true)
+  def |-!(as: AxiomSet): Boolean =
+    val b = as.getAxiomSeq.map(doEntails(this, _, out = true)).forall(_ == true)
     println("")
     b
 
   /** Test entailment for the knowledge base. Always prints. */
-  def ⊩(as: AxiomSetBuilder): Boolean = |-!(as)
+  def ⊩(as: AxiomSet): Boolean = |-!(as)
 
   /** Print the knowledge base. */
   def show: Unit = println(this.toString ++ "\n")
@@ -97,8 +95,9 @@ case class KnowledgeBase(
   private var axioms: AxiomSet = AxiomSet(Set())
 
   /** Add axioms to the reasoner. */
-  private def addAxioms(as: AxiomSet): Unit =
+  private def addAxioms(as: AxiomSet): KnowledgeBase =
     axioms = axioms.join(as)
     re.addAxioms(as)
+    this
 
 end KnowledgeBase

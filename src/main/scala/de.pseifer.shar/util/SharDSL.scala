@@ -28,11 +28,13 @@ class SharDSL(
     noisy: Boolean = true
 ):
 
-  // State of the reasoning backend.
-  implicit val state: BackendState = BackendState(init, prefixes)
+  val shar = Shar(init, prefixes)
+  import shar.{state => _, _}
 
   // Implicit builder for axioms.
   implicit val axiomSetBuilder: AxiomSetBuilder = AxiomSetBuilder()
+
+  implicit val state: BackendState = shar.state
 
   // Make a KnowledgeBase with a name and standard setup.
   private def mkKB(name: String) =
@@ -70,6 +72,9 @@ class SharDSL(
     def ===(d: Concept)(implicit asb: AxiomSetBuilder): AxiomSetBuilder =
       asb.add(Equality(c, d))
   }
+
+  // Terminal for axiom set builder.
+  def ::(implicit asb: AxiomSetBuilder): AxiomSet = AxiomSet(asb.toSet)
 
   // == Concept DLS ==
 
@@ -170,22 +175,22 @@ class SharDSL(
   // == KnowledgeBase API on defaultReasoner ==
 
   /** Add axioms to the default knowledge base. */
-  def +=(as: AxiomSetBuilder): KnowledgeBase = defaultReasoner += as
+  def +=(as: AxiomSet): KnowledgeBase = defaultReasoner += as
 
   /** Add axioms to the default knowledge base. */
-  def ⩲(as: AxiomSetBuilder): KnowledgeBase = +=(as)
+  def ⩲(as: AxiomSet): KnowledgeBase = +=(as)
 
   /** Test entailment for the default knowledge base. Print if noisy is set. */
-  def |-(as: AxiomSetBuilder): Boolean = defaultReasoner |- as
+  def |-(as: AxiomSet): Boolean = defaultReasoner |- as
 
   /** Test entailment for the default knowledge base. Print if noisy is set. */
-  def ⊢(as: AxiomSetBuilder): Boolean = |-(as)
+  def ⊢(as: AxiomSet): Boolean = |-(as)
 
   /** Test entailment for the default knowledge base. Always prints. */
-  def !|-(as: AxiomSetBuilder): Boolean = defaultReasoner |-! as
+  def !|-(as: AxiomSet): Boolean = defaultReasoner |-! as
 
   /** Test entailment for the default knowledge base. Always prints. */
-  def ⊩(as: AxiomSetBuilder): Boolean = !|-(as)
+  def ⊩(as: AxiomSet): Boolean = !|-(as)
 
   /** Print the default knowledge base. */
   def show(): Unit = defaultReasoner.show
