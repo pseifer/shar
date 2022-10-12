@@ -74,7 +74,8 @@ class SharDSL(
   }
 
   // Terminal for axiom set builder.
-  def ::(implicit asb: AxiomSetBuilder): AxiomSet = AxiomSet(asb.toSet)
+  def <(a: AxiomSetBuilder): AxiomSet =
+    AxiomSet(a.toSet)
 
   // == Concept DLS ==
 
