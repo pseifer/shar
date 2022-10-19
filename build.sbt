@@ -1,4 +1,4 @@
-val scala3Version = "3.1.0"
+val scala3Version = "3.2.0"
 
 lazy val root = project
   .in(file("."))
@@ -6,6 +6,7 @@ lazy val root = project
   .settings(
     name := "shar",
     organization := "de.pseifer",
+    javaOptions += "-Dfile.encoding=UTF-8",
     version := "0.1.0-SNAPSHOT",
     Antlr4 / antlr4Version := "4.7.2",
     Antlr4 / antlr4GenVisitor := true,

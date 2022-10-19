@@ -25,7 +25,7 @@ sealed trait Name extends Encodeable:
   /** Per default, names are the same when showing to users and encoding
     * internally.
     */
-  def show(state: BackendState): String = encode
+  def show(implicit state: BackendState): String = encode
 
 /** IRI. Constructor is private, so IRI may only be created via the
   * Iri.fromString method, which returns None on invalid IRIs.
@@ -38,7 +38,7 @@ class Iri private (val value: String) extends Name:
 
   /** Show this Iri for user-end purposes.
     */
-  override def show(state: BackendState): String =
+  override def show(implicit state: BackendState): String =
     state.prefixes.retractToStringIfPossible(this)
 
   private def stripped: String = value.drop(1).dropRight(1)
