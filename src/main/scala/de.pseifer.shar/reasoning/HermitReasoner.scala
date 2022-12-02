@@ -89,6 +89,8 @@ class HermitReasoner(val initialization: ReasonerInitialization)
           val l1 = if !ac.isEmpty then mkAxiomset(ac) else Set()
           val l2 = if !ad.isEmpty then mkAxiomset(ac) else Set()
           (Set(df.getOWLDisjointClassesAxiom(cc, dd)) ++ l1 ++ l2).toList
+        case RoleSubsumption(r, p) =>
+          Set(df.getOWLSubObjectPropertyOfAxiom(convert(r), convert(p)))
     }.toSet
 
   // Functionality.
@@ -128,15 +130,23 @@ class HermitReasoner(val initialization: ReasonerInitialization)
   def prove(axiom: Axiom): Boolean =
 
     val r = axiom match
-      case Subsumption(c, d) => subsumed(c, d)
-      case Equality(c, d)    => equal(c, d)
-      case Satisfiability(c) => satisfiable(c)
+      case Subsumption(c, d)     => subsumed(c, d)
+      case Equality(c, d)        => equal(c, d)
+      case Satisfiability(c)     => satisfiable(c)
+      case RoleSubsumption(r, p) => subsumed(r, p)
     r
 
   // Internal.
 
   private def equal(c: Concept, d: Concept): Boolean =
     subsumed(c, d) && subsumed(d, c)
+
+  private def subsumed(r: Role, p: Role): Boolean =
+    reason(
+      _.isEntailed(
+        model(_.getOWLSubObjectPropertyOfAxiom(convert(r), convert(p)))
+      )
+    )
 
   private def subsumed(c: Concept, d: Concept): Boolean =
     val (cc, ac) = convert(c)(AxiomSet.empty)

@@ -29,6 +29,16 @@ object Subsumption:
       case a: Subsumption => Right(a)
       case _              => Left(error)
 
+case class RoleSubsumption(r: Role, p: Role) extends Axiom:
+  override def show(implicit state: BackendState): String =
+    r.show(state) ++ " ⊑ " ++ p.show(state)
+
+  def encode: String = r.encode ++ " :<= " ++ p.encode
+
+  def concepts: Set[Iri] = Set()
+
+  def properties: Set[Iri] = r.properties.union(p.properties)
+
 case class Equality(c: Concept, d: Concept) extends Axiom:
   override def show(implicit state: BackendState): String =
     c.show(state) ++ " ≡ " ++ d.show(state)

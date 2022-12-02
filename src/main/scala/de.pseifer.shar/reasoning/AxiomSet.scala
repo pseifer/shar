@@ -30,9 +30,10 @@ class AxiomSet(private val axioms: Set[Axiom])
   def map(f: Concept => Concept): AxiomSet =
     AxiomSet(axioms.map { m =>
       m match
-        case Subsumption(c, d) => Subsumption(f(c), f(d))
-        case Equality(c, d)    => Equality(f(c), f(d))
-        case Satisfiability(c) => Satisfiability(f(c))
+        case Subsumption(c, d)            => Subsumption(f(c), f(d))
+        case Equality(c, d)               => Equality(f(c), f(d))
+        case Satisfiability(c)            => Satisfiability(f(c))
+        case rsub @ RoleSubsumption(_, _) => rsub
     })
 
   def canEqual(a: Any) = a.isInstanceOf[AxiomSet]
