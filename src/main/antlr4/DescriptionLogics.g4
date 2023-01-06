@@ -4,15 +4,11 @@ grammar DescriptionLogics;
 package de.pseifer.shar.parsing;
 }
 
-formula: formula0 EOF;
-
-formula0: concept_with_context | formula1;
-
-concept_with_context: formula1 '@' GROUP_LEFT axiom GROUP_RIGHT;
+formula: formula1 EOF;
 
 axiom: (subsumption)+;
 
-subsumption: formula0 SQSUBSETEQ formula0;
+subsumption: formula1 SQSUBSETEQ formula1;
 
 formula1: union | formula2;
 

@@ -12,6 +12,7 @@ import de.pseifer.shar.core.{
 import de.pseifer.shar.dl._
 
 import org.semanticweb.HermiT.{Configuration, Reasoner => Hermit}
+import org.semanticweb.HermiT.Configuration.TableauMonitorType
 import org.semanticweb.owlapi.apibinding.OWLManager
 import org.semanticweb.owlapi.model._
 import org.semanticweb.owlapi.reasoner.Node
@@ -25,10 +26,17 @@ import java.io.File
 
 /** A DL reasoner that uses HermiT internally.
   */
-class HermitReasoner(val initialization: ReasonerInitialization)
-    extends DLReasoner(initialization):
+class HermitReasoner(
+    val initialization: ReasonerInitialization,
+    configuration: HermitConfiguration = HermitConfiguration(),
+    debugging: Boolean = false
+) extends DLReasoner(initialization):
 
   // TODO: Wrap internal in a flush-state dependent thing.
+
+  /** Print message, if debugging is enabled. */
+  private def debug(message: String): Unit =
+    if debugging then println(message)
 
   // Setup.
 
@@ -49,12 +57,12 @@ class HermitReasoner(val initialization: ReasonerInitialization)
   private val reasonerConfig = Configuration()
   reasonerConfig.ignoreUnsupportedDatatypes = true
 
-  //reasonerConfig.blockingStrategyType =
-  //  Configuration.BlockingStrategyType.ANYWHERE
-  //reasonerConfig.existentialStrategyType =
-  //  Configuration.ExistentialStrategyType.CREATION_ORDER
+  // Monitoring (when debugging is enabled).
+  if debugging then
+    reasonerConfig.tableauMonitorType = TableauMonitorType.TIMING
 
-  //reasonerConfig.directBlockingType = Configuration.DirectBlockingType.PAIR_WISE
+  // Set all remainign configurations.
+  configuration.set(reasonerConfig)
 
   private val hermit: Hermit = Hermit(reasonerConfig, ontology)
 
@@ -70,25 +78,16 @@ class HermitReasoner(val initialization: ReasonerInitialization)
     axioms.getAxiomSeq.flatMap { a =>
       a match
         case Subsumption(c, d) =>
-          val (cc, ac) = convert(c)(AxiomSet.empty)
-          val (dd, ad) = convert(d)(AxiomSet.empty)
-          val l1 = if !ac.isEmpty then mkAxiomset(ac) else Set()
-          val l2 = if !ad.isEmpty then mkAxiomset(ac) else Set()
-          (Set(df.getOWLSubClassOfAxiom(cc, dd)) ++ l1 ++ l2).toList
+          Set(df.getOWLSubClassOfAxiom(convert(c), convert(d)))
         case Equality(c, d) =>
-          val (cc, ac) = convert(c)(AxiomSet.empty)
-          val (dd, ad) = convert(d)(AxiomSet.empty)
-          val l1 = if !ac.isEmpty then mkAxiomset(ac) else Set()
-          val l2 = if !ad.isEmpty then mkAxiomset(ac) else Set()
-          (Set(df.getOWLSubClassOfAxiom(cc, dd)) ++ Set(
+          val cc = convert(c)
+          val dd = convert(d)
+          Set(
+            df.getOWLSubClassOfAxiom(cc, dd),
             df.getOWLSubClassOfAxiom(dd, cc)
-          ) ++ l1 ++ l2).toList
+          )
         case Satisfiability(c) =>
-          val (cc, ac) = convert(c)(AxiomSet.empty)
-          val (dd, ad) = convert(Bottom)(AxiomSet.empty)
-          val l1 = if !ac.isEmpty then mkAxiomset(ac) else Set()
-          val l2 = if !ad.isEmpty then mkAxiomset(ac) else Set()
-          (Set(df.getOWLDisjointClassesAxiom(cc, dd)) ++ l1 ++ l2).toList
+          Set(df.getOWLDisjointClassesAxiom(convert(c), convert(Bottom)))
         case RoleSubsumption(r, p) =>
           Set(df.getOWLSubObjectPropertyOfAxiom(convert(r), convert(p)))
     }.toSet
@@ -129,6 +128,8 @@ class HermitReasoner(val initialization: ReasonerInitialization)
 
   def prove(axiom: Axiom): Boolean =
 
+    debug("Axiom: " ++ axiom.toString)
+
     val r = axiom match
       case Subsumption(c, d)     => subsumed(c, d)
       case Equality(c, d)        => equal(c, d)
@@ -142,35 +143,43 @@ class HermitReasoner(val initialization: ReasonerInitialization)
     subsumed(c, d) && subsumed(d, c)
 
   private def subsumed(r: Role, p: Role): Boolean =
-    reason(
+    debug("Starting ROLE SUBSUMPTION task.")
+    val result = reason(
       _.isEntailed(
         model(_.getOWLSubObjectPropertyOfAxiom(convert(r), convert(p)))
       )
     )
+    debug(s"Result: $result")
+    result
 
   private def subsumed(c: Concept, d: Concept): Boolean =
-    val (cc, ac) = convert(c)(AxiomSet.empty)
-    val (dd, ad) = convert(d)(AxiomSet.empty)
-    val axioms = ac.join(ad)
 
-    addAxioms(axioms)
+    debug(s"Converting: $c")
+    val cc = convert(c)
 
-    val result = reason(_.isEntailed(model(_.getOWLSubClassOfAxiom(cc, dd)))) &&
-      !reason(
-        _.isEntailed(
-          model(
-            _.getOWLSubClassOfAxiom(cc, model(_.getOWLObjectComplementOf(dd)))
-          )
-        )
-      )
+    debug(s"Converted: $cc")
+    debug(s"Converting: $d")
 
-    removeAxioms(axioms)
+    val dd = convert(d)
 
+    debug(s"Converted: $dd")
+    debug(s"Obtaining task.")
+
+    val task = model(_.getOWLSubClassOfAxiom(cc, dd))
+
+    debug(s"Obtained task: $task")
+    debug("Starting SUBSUMPTION task.")
+
+    val result = reason(_.isEntailed(task))
+
+    debug(s"Result: $result")
     result
 
   private def satisfiable(c: Concept): Boolean =
-    val (cc, a) = convert(c)(AxiomSet.empty) // TODO: Add axioms.
-    reason(_.isSatisfiable(cc))
+    debug("Starting SATISFIABILITY task.")
+    val result = reason(_.isSatisfiable(convert(c)))
+    debug(s"Result: $result")
+    result
 
   private def convert(iri: Iri): IRI = IRI.create(iri.getRaw)
 
@@ -185,90 +194,65 @@ class HermitReasoner(val initialization: ReasonerInitialization)
   private def convertD(concept: NamedConcept): OWLDataRange =
     model(_.getOWLDatatype(convert(concept.c)))
 
-  private def convert(concept: Concept)(implicit
-      axioms: AxiomSet
-  ): (OWLClassExpression, AxiomSet) =
+  private def convert(concept: Concept): OWLClassExpression =
     concept match
 
       case Top =>
-        (model(_.getOWLThing), axioms)
+        model(_.getOWLThing)
 
       case Bottom =>
-        (model(_.getOWLNothing), axioms)
+        model(_.getOWLNothing)
 
       case NominalConcept(iri) =>
-        (
-          model(_.getOWLObjectOneOf(OWLNamedIndividualImpl(convert(iri)))),
-          axioms
-        )
+        model(_.getOWLObjectOneOf(OWLNamedIndividualImpl(convert(iri))))
 
       case NamedConcept(iri) =>
-        (model(_.getOWLClass(convert(iri))), axioms)
-
-      //case DefinedConcept(name) =>
-      //  (model(_.getOWLClass(convert(name.toIri))), axioms)
-
-      case ConceptWithContext(concept, set) =>
-        val (c, a) = convert(concept)
-        (c, a.join(set))
+        model(_.getOWLClass(convert(iri)))
 
       case Complement(c) =>
-        val (cc, a) = convert(c)
-        (model(_.getOWLObjectComplementOf(cc)), a)
+        model(_.getOWLObjectComplementOf(convert(c)))
 
       case Intersection(c, d) =>
-        val (cc, ac) = convert(c)
-        val (dd, ad) = convert(d)
-        (model(_.getOWLObjectIntersectionOf(cc, dd)), ac.join(ad))
+        model(_.getOWLObjectIntersectionOf(convert(c), convert(d)))
 
       case Union(c, d) =>
-        val (cc, ac) = convert(c)
-        val (dd, ad) = convert(d)
-        (model(_.getOWLObjectUnionOf(cc, dd)), ac.join(ad))
+        model(_.getOWLObjectUnionOf(convert(c), convert(d)))
 
       // Roles - DataProperties
 
-      // Specifically for Datatypes (GT)
       case GreaterThan(n, r: NamedRole, c: NamedConcept) if c.c.isDatatype =>
-        (model(_.getOWLDataMinCardinality(n, convertD(r), convertD(c))), axioms)
+        model(_.getOWLDataMinCardinality(n, convertD(r), convertD(c)))
 
-      // Specifically for Datatypes (LT)
       case LessThan(n, r: NamedRole, c: NamedConcept) if c.c.isDatatype =>
-        (model(_.getOWLDataMaxCardinality(n, convertD(r), convertD(c))), axioms)
+        model(_.getOWLDataMaxCardinality(n, convertD(r), convertD(c)))
 
-      // Specifically for Datatypes (EXISTS)
       case Existential(r: NamedRole, c: NamedConcept) if c.c.isDatatype =>
-        (model(_.getOWLDataSomeValuesFrom(convertD(r), convertD(c))), axioms)
+        model(_.getOWLDataSomeValuesFrom(convertD(r), convertD(c)))
 
-      // Specifically for Datatypes (FORALL)
       case Universal(r: NamedRole, c: NamedConcept) if c.c.isDatatype =>
-        (model(_.getOWLDataAllValuesFrom(convertD(r), convertD(c))), axioms)
+        model(_.getOWLDataAllValuesFrom(convertD(r), convertD(c)))
 
       // Roles - ObjectProperties
 
       case GreaterThan(n, r, c) =>
-        val (cc, ac) = convert(c)
-        (model(_.getOWLObjectMinCardinality(n, convert(r), cc)), ac)
+        model(_.getOWLObjectMinCardinality(n, convert(r), convert(c)))
 
-      // Optional, presumably better performance.
       case LessThan(n, r, c) =>
-        val (cc, ac) = convert(c)
-        (model(_.getOWLObjectMaxCardinality(n, convert(r), cc)), ac)
+        model(_.getOWLObjectMaxCardinality(n, convert(r), convert(c)))
 
-      // Optional, presumably better performance.
       case Existential(r, c) =>
-        val (cc, ac) = convert(c)
-        (model(_.getOWLObjectSomeValuesFrom(convert(r), cc)), ac)
+        model(_.getOWLObjectSomeValuesFrom(convert(r), convert(c)))
 
-      // Optional, presumably better performance.
       case Universal(r, c) =>
-        val (cc, ac) = convert(c)
-        (model(_.getOWLObjectAllValuesFrom(convert(r), cc)), ac)
+        model(_.getOWLObjectAllValuesFrom(convert(r), convert(c)))
 
       case d: DerivedNumberRestriction => convert(d.toGreaterThan)
 
 object HermitReasoner:
   def default: HermitReasoner =
+    default(HermitConfiguration(), debugging = false)
+
+  def default(config: HermitConfiguration, debugging: Boolean): HermitReasoner =
     val state: BackendState =
       BackendState(EmptyInitialization, PrefixMapping.default)
-    HermitReasoner(state.reasonerInit)
+    HermitReasoner(state.reasonerInit, config, debugging = debugging)

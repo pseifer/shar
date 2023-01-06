@@ -50,23 +50,6 @@ final case class NominalConcept(name: Iri) extends Concept:
   override def show(implicit state: BackendState): String =
     "{" ++ name.show(state) ++ "}"
 
-/** <'..scaspa../name/'> Note: A defined concept is only meaningful as the head
-  * of a ConceptWithContext (CwC), or within the context of a CwC.
-  */
-//final case class DefinedConcept(defined: DefinedName) extends Concept:
-//  def encode: String = defined.encode
-//  override def show(state: BackendState): String = defined.show
-
-/** concept ; axiom* A concept, but it brings some 'context' that is required
-  * when reasoning with this concept. Typically used for DefinedConcepts.
-  */
-final case class ConceptWithContext(defined: Concept, context: AxiomSet)
-    extends Concept:
-  def encode: String = defined.encode ++ " @ ( " + context.encode + " )"
-  override def show(implicit state: BackendState): String = encode
-
-  override def concepts: Set[Iri] = defined.concepts
-
 /** 'lhs' ⊔ 'rhs'
   */
 final case class Union(lhs: Concept, rhs: Concept) extends Concept:
@@ -186,13 +169,9 @@ object Concept:
     case Union(lexpr, rexpr)     => f(Union(map(f, lexpr), map(f, rexpr)))
     case Intersection(lexpr, rexpr) =>
       f(Intersection(map(f, lexpr), map(f, rexpr)))
-    case ConceptWithContext(c, cntx) => f(ConceptWithContext(f(c), cntx.map(f)))
-    case _                           => f(concept)
+    case _ => f(concept)
 
   def foreach(f: Concept => Unit, concept: Concept): Unit = concept match
-    case ConceptWithContext(c, cntx) =>
-      f(concept)
-      foreach(f, c)
     case Complement(i) =>
       f(concept)
       foreach(f, i)

@@ -185,19 +185,6 @@ class ConceptParser(state: BackendState)
     ): SharTry[DLExpression] =
       selectChild(ctx, 1, identity)
 
-    override def visitConcept_with_context(
-        ctx: Concept_with_contextContext
-    ): SharTry[DLExpression] =
-      for
-        concept <- visit(ctx.getChild(0))
-        c <- Concept.orElse(concept, ierr("visitConcept_with_context"))
-        axiomsI <- visit(ctx.getChild(3))
-        axioms <- AxiomSet.orElse(
-          axiomsI,
-          ierr("visitConcept_with_context")
-        )
-      yield ConceptWithContext(c, axioms)
-
     override def visitAxiom(ctx: AxiomContext): SharTry[AxiomSet] =
       val axioms = ctx.subsumption.asScala.toList.map { child =>
         for
