@@ -75,7 +75,8 @@ class PrefixMapping:
       yield
         if addDefaults then addToDefaults(prefix, iri)
         else add(prefix, iri)
-    r.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
+    //r.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
+    r.filter(_.isLeft).headOption.getOrElse(Right(true))
 
   /** Add a new prefix, if not already defined (differently).
     */
@@ -195,7 +196,8 @@ class PrefixMapping:
         if addDefaults then pr.map(addToDefaults)
         else pr.map(add)
       // Report (the first) error.
-      updated.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
+      //updated.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
+      updated.filter(_.isLeft).headOption.getOrElse(Right(true))
 
 object PrefixMapping:
   def default: PrefixMapping = PrefixMapping()
