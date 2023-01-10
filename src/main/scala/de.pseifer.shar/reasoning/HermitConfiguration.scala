@@ -37,13 +37,18 @@ enum HermitExistentialStrategy:
   case El
   case Default
 
+case class HermitOtherSettings(
+    individualTaskTimeout: Long = -1
+)
+
 /** Configuration for HermiT. */
 case class HermitConfiguration(
     directBlocking: HermitDirectBlocking = HermitDirectBlocking.Default,
     blockingStrategy: HermitBlockingStrategy = HermitBlockingStrategy.Default,
     signatureCache: HermitSignatureCache = HermitSignatureCache.Default,
     existentialStrategy: HermitExistentialStrategy =
-      HermitExistentialStrategy.Default
+      HermitExistentialStrategy.Default,
+    otherSettings: HermitOtherSettings = HermitOtherSettings()
 ):
 
   /** Apply settings to a Hermit configuration. */
@@ -91,3 +96,5 @@ case class HermitConfiguration(
       case HermitExistentialStrategy.El =>
         config.existentialStrategyType = ExistentialStrategyType.EL
       case HermitExistentialStrategy.Default => ()
+
+    config.individualTaskTimeout = otherSettings.individualTaskTimeout

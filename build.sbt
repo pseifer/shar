@@ -13,8 +13,8 @@ lazy val root = project
     scalaVersion := scala3Version,
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.15.4" % Test,
-    libraryDependencies +=
-      "com.hermit-reasoner" % "org.semanticweb.hermit" % "1.3.8.4",
+    libraryDependencies += "net.sourceforge.owlapi" % "org.semanticweb.hermit" % "1.4.5.519",
+    libraryDependencies += "net.sourceforge.owlapi" % "owlapi-api" % "5.1.20",
     libraryDependencies ++= Seq(
       // ANTLR
       "org.antlr" % "antlr4" % "4.7.2",

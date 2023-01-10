@@ -21,9 +21,9 @@ import de.pseifer.shar.parsing._
   *   Always output to stdout (e.g., for entailment ⊢)
   */
 class SharDSL(
+    reasoner: ReasonerInitialization => DLReasoner,
     init: ReasonerInitialization = EmptyInitialization,
     prefixes: PrefixMapping = PrefixMapping.default,
-    reasoner: ReasonerInitialization => DLReasoner = HermitReasoner(_),
     defaultIsSharPrefix: Boolean = true,
     noisy: Boolean = true
 ):

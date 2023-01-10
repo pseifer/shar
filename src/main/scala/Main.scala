@@ -1,8 +1,9 @@
 package de.pseifer.shar
 
+import de.pseifer.shar.reasoning.HermitReasoner
 import de.pseifer.shar.SharDSL
 
-val shar = SharDSL()
+val shar = SharDSL(HermitReasoner(_))
 import shar._
 
 @main def example: Unit =
