@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration
 
 /** A description logics reasoner using OWL API. */
-abstract class DLReasonerImpl(
+abstract class OwlApiReasonerImpl(
     initialization: ReasonerInitialization,
     debugging: Boolean = false
 ) extends DLReasoner(initialization):

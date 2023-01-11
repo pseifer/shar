@@ -12,10 +12,10 @@ import org.semanticweb.owlapi.model._
 /** A DL reasoner that uses HermiT internally.
   */
 class HermitReasoner(
-    initialization: ReasonerInitialization,
+    initialization: ReasonerInitialization = EmptyInitialization(),
     configuration: HermitConfiguration = HermitConfiguration(),
     debugging: Boolean = false
-) extends DLReasonerImpl(initialization, debugging):
+) extends OwlApiReasonerImpl(initialization, debugging):
 
   // Custom reasoner configuration, so we can tell HermiT to ignore
   // 'unsupported' (i.e., non-OWL-2-mapping) data types.
@@ -30,12 +30,3 @@ class HermitReasoner(
   configuration.set(reasonerConfig)
 
   protected val reasoner: Hermit = Hermit(reasonerConfig, ontology)
-
-object HermitReasoner:
-  def default: HermitReasoner =
-    default(HermitConfiguration(), debugging = false)
-
-  def default(config: HermitConfiguration, debugging: Boolean): HermitReasoner =
-    val state: BackendState =
-      BackendState(EmptyInitialization(), PrefixMapping.default)
-    HermitReasoner(state.reasonerInit, config, debugging = debugging)

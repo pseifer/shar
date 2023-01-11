@@ -18,11 +18,11 @@ https://github.com/pseifer/shar/blob/d7f36d3a3487078dbe6e336c62666315959bcd17/ex
 
 There are various ways of constructing axioms and concept expressions, including the Unicode operators used in this example. Note, that in some instances and due to the operator precedence rules in Scala, additional parentheses are required. Additionally, there are ASCII-only alternative operators (including ```&, |, E, A, >>=, ===, |-``` and ```+=```). Concept expressions can also be parsed in their entirety from Strings, where again full Unicode and ASCII variants exists (see also this [grammar](https://github.com/pseifer/shar/blob/main/src/main/antlr4/DescriptionLogics.g4)). For the sake of simplicity, parsing of IRIs fails with runtime exceptions in the DSL. When using the full ```Shar``` API (see below), proper error handling via ```Try``` is available.
 
-While there is also a default knowledge base (accessible by using operators without left-hand-side arguments), using explicitly named knowledge bases is preferrable. Thus, we can construct another knowledge base and then use the union of both knowledge bases for checking entailment of an axiom: 
+While there is also a default knowledge base (accessible by using operators without left-hand-side arguments), using explicitly named knowledge bases is preferable. Thus, we can construct another knowledge base and then use the union of both knowledge bases for checking entailment of an axiom: 
 
 https://github.com/pseifer/shar/blob/d7f36d3a3487078dbe6e336c62666315959bcd17/examples/DSL.scala#L20-L31
 
-By default, using the entailment operator prints the axiom and result (in addition to returning the result as a boolean value). Supplying the argument ```noisy=false``` to the ```Shar``` constructor disables this behaviour. A knowledge base can be printed via ```.show```. The DSL also offers functions ```show(s: String*)``` and ```showfocus(s: String*)``` for formatting text output in-between knowledge bases and entailments.
+By default, using the entailment operator prints the axiom and result (in addition to returning the result as a Boolean value). Supplying the argument ```noisy=false``` to the ```Shar``` constructor disables this behaviour. A knowledge base can be printed via ```.show```. The DSL also offers functions ```show(s: String*)``` and ```showfocus(s: String*)``` for formatting text output in-between knowledge bases and entailments.
 
 https://github.com/pseifer/shar/blob/d7f36d3a3487078dbe6e336c62666315959bcd17/examples/DSL.scala#L33-L34
 
@@ -30,15 +30,35 @@ Further configuration allows importing ontologies (```init: ReasonerInitilizatio
 
 ## Replacing HermiT
 
-Custom reasoner implementations can be supplied by instantiating the ```DLReasoner``` trait and supplying the ```Shar``` constructor with the optional argument ```reasoner: ReasonerInitialization => DLReasoner```.
+When using any OWL-API based reasoner (i.e., a reasoner created by a ```OWLReasonerFacotory```), such as JFact or Openllet, the generic ```OwlApiReasoner``` can be used. See the following two examples. (Note, that the respective dependencies must be added as well.)
+
+```scala
+import uk.ac.manchester.cs.jfact.JFactFactory
+
+/** A reasoner that uses JFact. */
+val jfact = OwlApiReasoner(JFactFactory())
+```
+
+```scala
+import openllet.owlapi.OpenlletReasonerFactory
+
+/** A reasoner that uses Openllet. */
+val openllet = OwlApiReasoner(OpenlletReasonerFactory())
+```
+
+Other custom reasoner implementations can be supplied by instantiating the ```DLReasoner``` trait.
 
 ```scala
 class FalseReasoner(init: ReasonerInitialization) extends DLReasoner(init):
   def addAxioms(axioms: AxiomSet): Unit = ()
   def prove(axiom: Axiom): Boolean = false
 end FalseReasoner
+```
 
-val shar = Shar(reasoner = FalseReasoner(_))
+A replacement reasoner can be activated by supplying the ```Shar``` constructor with the optional argument ```reasoner: ReasonerInitialization => DLReasoner```.
+
+```scala
+val shar = Shar(FalseReasoner(_))
 import shar._
 ```
 
@@ -61,4 +81,4 @@ On Windows Systems, you may want to use ```chcp 65001``` for UTF-8 support.
 
 [HermiT Reasoner](http://www.hermit-reasoner.com/)
 
-Shar was developed by Philipp Seifer, Software Languages Team at Universtity Koblenz-Landau, Koblenz, Germany.
+Shar was developed by Philipp Seifer, Software Languages Team at University Koblenz-Landau, Koblenz, Germany.
