@@ -10,7 +10,7 @@ import de.pseifer.shar.core._
   *   a custom, predefined prefix mapping
   */
 class Shar(
-    init: ReasonerInitialization = EmptyInitialization,
+    init: ReasonerInitialization = EmptyInitialization(),
     prefixes: PrefixMapping = PrefixMapping.default
 ):
 

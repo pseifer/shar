@@ -22,7 +22,7 @@ import de.pseifer.shar.parsing._
   */
 class SharDSL(
     reasoner: ReasonerInitialization => DLReasoner,
-    init: ReasonerInitialization = EmptyInitialization,
+    init: ReasonerInitialization = EmptyInitialization(),
     prefixes: PrefixMapping = PrefixMapping.default,
     defaultIsSharPrefix: Boolean = true,
     noisy: Boolean = true

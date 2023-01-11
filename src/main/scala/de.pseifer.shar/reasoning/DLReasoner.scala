@@ -1,7 +1,7 @@
 package de.pseifer.shar.reasoning
 
-import de.pseifer.shar.dl.Axiom
 import de.pseifer.shar.core.ReasonerInitialization
+import de.pseifer.shar.dl.Axiom
 
 /** A description logics reasoner, that can prove axioms.
   *
