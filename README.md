@@ -4,7 +4,15 @@
 
 # Scala + HermiT API and REPL
 
-Shar features a collection of abstract data types for description logic expressions, a wrapper around the HermiT reasoner, additional tools such as parsers from two DL notations (formal and an ASCII-only variant) and a simple DSL for constructing and working with DL knowledge bases.
+```Shar``` features a collection of abstract data types for description logic expressions and axioms in a robust API for working with the HermiT reasoner (as well as other OWL-API based reasoners), additional tools such as parsers from two DL notations (formal and an ASCII-only variant) and a simple DSL for constructing and working with DL knowledge bases.
+
+# API
+
+```Shar``` features a collection of abstract data types for representing DL concept expressions and axioms, including management of prefixes, pretty printing and parsing from multiple concrete syntaxes.
+
+```scala
+// TODO: Example for importing some ontology and checking entailment.
+```
 
 # DSL
 
@@ -30,7 +38,7 @@ Further configuration allows importing ontologies (```init: ReasonerInitilizatio
 
 ## Replacing HermiT
 
-When using any OWL-API based reasoner (i.e., a reasoner created by a ```OWLReasonerFacotory```), such as JFact or Openllet, the generic ```OwlApiReasoner``` can be used. See the following two examples. (Note, that the respective dependencies must be added as well.)
+When using any OWL-API based reasoner (i.e., a reasoner created by a ```OWLReasonerFactory```), such as JFact or Openllet, the generic ```OwlApiReasoner``` can be used. See the following two examples. (Note, that the respective dependencies must be added as well.)
 
 ```scala
 import uk.ac.manchester.cs.jfact.JFactFactory
@@ -62,10 +70,6 @@ val shar = Shar(FalseReasoner(_))
 import shar._
 ```
 
-# API
-
-TBD
-
 # REPL
 
 For now, the ```Shar``` REPL consists of the standard Scala console. A session can be started via
@@ -79,6 +83,9 @@ On Windows Systems, you may want to use ```chcp 65001``` for UTF-8 support.
 
 # References
 
-[HermiT Reasoner](http://www.hermit-reasoner.com/)
+- [HermiT Reasoner](http://www.hermit-reasoner.com/)
+- [Openllet Reasoner](https://github.com/Galigator/openllet)
+- [JFact Reasoner](https://jfact.sourceforge.net/)
+- [OWL API](https://github.com/owlcs/owlapi)
 
 Shar was developed by Philipp Seifer, Software Languages Team at University Koblenz-Landau, Koblenz, Germany.
