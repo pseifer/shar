@@ -49,6 +49,7 @@ class SharREPL(
   // The result that a CLI application returns.
   private var quit: Boolean = false
   private var repl: Boolean = false
+  private var entMode: Boolean = false
 
   // Info messages held back from printing.
   private var infoMessageLog: String = ""
@@ -67,20 +68,23 @@ class SharREPL(
     |  Define axioms (unicode or ASCII-only)
     |    :Child ⊑ ∃:knows.:Person
     |    :Child << #E:knows.:Person
-    |    :NiceChild ⊑ :Child ⊓ :Nice
-    |    :NiceChild << :Child & :Nice
+    |    :NiceChild ≡ :Child ⊓ :Nice
+    |    :NiceChild == :Child & :Nice
     |  
     |  Check entailment
     |    ⊢ :NiceChild ⊑ ∃:knows.⊤
     |    :- :NiceChild << #E:knows.#t
     |  
     |  Other useful commands
+    |    'entailment.' enter entailment mode, check all axioms.
+    |    'normal.' return to normal mode.
     |    'info.' print recent axioms in knowledge base.
     |    'quit.' quit the REPL.
+    |
     |    Files supplied as arguments are processed.
+    |    See also 'shar --help' for script mode.
     |
     | More information at https://github.com/pseifer/shar
-    |
     """.stripMargin
     println(msg)
 
@@ -92,6 +96,8 @@ class SharREPL(
       case "r" => handleCommand("result.")
       case "q" => handleCommand("quit.")
       case "h" => handleCommand("help.")
+      case "n" => handleCommand("normal.")
+      case "e" => handleCommand("entailment.")
       case "info" => 
         if !config.silent then println(infoMessageLog) 
         infoMessageLog = ""
@@ -101,6 +107,13 @@ class SharREPL(
       case "noinfo" => infoMessageLog = ""
       case "noresult" => resultMessageLog = ""
       case "help" => printHelp()
+      case "entailment" => 
+        println("In entailment mode, all entered axioms are checked.")
+        println("Use 'normal.' to return to normal mode.\n")
+        entMode = true
+      case "normal" => 
+        println()
+        entMode = false
       case "quit" => 
         quit = true
         println("Goodbye!") 
@@ -119,6 +132,10 @@ class SharREPL(
       parseAxiom("⊑", Subsumption(_, _), line)
     else if line.indexOf(" << ") != -1 then
       parseAxiom("<<", Subsumption(_, _), line)
+    else if line.indexOf(" ⊒ ") != -1 then 
+      parseAxiom("⊒", Subsumption(_, _), line)
+    else if line.indexOf(" >> ") != -1 then
+      parseAxiom(">>", (l, r) => Subsumption(r, l), line)
     else if line.indexOf(" ≡ ") != -1 then
       parseAxiom("<<", Subsumption(_, _), line)
     else if line.indexOf(" == ") != -1 then
@@ -172,14 +189,26 @@ class SharREPL(
   def process(lines: String): Unit =
     process(lines.linesIterator.toSeq)
 
-  def launch(): Unit = 
+  def launch(entailmentMode: Boolean = false): Unit = 
+    entMode = entailmentMode
     println(config.infoline)
     println("Use 'help.' for help!")
+    if entMode then
+      println("In entailment mode, all entered axioms are checked.")
+      println("Use 'normal.' to enter normal mode.")
     println()
     repl = true
     while !quit do
-      print("> ")
-      val line = readLine()
-      process(line)
+      if entMode then 
+        print("⊢ ")
+        val line = readLine()
+        if isCommandPred(line) then
+          process(line)
+        else 
+          process("⊢ " ++ line)
+      else 
+        print("shar> ")
+        val line = readLine()
+        process(line)
 
   def getResult: Int = resultCode

@@ -35,7 +35,7 @@ import scala.util.Try
 
   // Launch REPL or return result.
   if launchRepl then
-    repl.launch()
+    repl.launch(entailmentMode = conf.sourceFile().nonEmpty)
   else
     System.exit(repl.getResult)
 
