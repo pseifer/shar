@@ -1,10 +1,12 @@
-package de.pseifer.shar
+package de.pseifer.shar.util
 
 import de.pseifer.shar.core._
 import de.pseifer.shar.dl._
 import de.pseifer.shar.error._
 import de.pseifer.shar.reasoning._
 import de.pseifer.shar.parsing._
+
+import scala.language.implicitConversions
 
 /** A DSL for description logic knowledgebases.
   *

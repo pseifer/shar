@@ -1,4 +1,4 @@
-package de.pseifer.shar
+package de.pseifer.shar.util
 
 import de.pseifer.shar.core.BackendState
 import de.pseifer.shar.dl.Axiom
@@ -50,6 +50,10 @@ case class KnowledgeBase(
   def +=(as: AxiomSet): KnowledgeBase =
     this.addAxioms(as)
 
+  /** Add axiom to the knowledge base. */
+  def +=(a: Axiom): KnowledgeBase =
+    this.addAxioms(AxiomSet(Set(a)))
+
   /** Add axioms to the knowledge base. */
   def ⩲(as: AxiomSet): KnowledgeBase = +=(as)
 
@@ -61,19 +65,23 @@ case class KnowledgeBase(
     b
 
   /** Test entailment for the knowledge base. Print if noisy is set. */
+  def |-(a: Axiom): Boolean = |-(AxiomSet(Set(a)))
+
+  /** Test entailment for the knowledge base. Print if noisy is set. */
   def ⊢(as: AxiomSet): Boolean = |-(as)
 
   /** Test entailment for the knowledge base. Always prints. */
   def |-!(as: AxiomSet): Boolean =
-    val b = as.getAxiomSeq.map(doEntails(this, _, out = true)).forall(_ == true)
-    println("")
+    val b = as.getAxiomSeq.map(doEntails(this, _, out = noisy)).forall(_ == true)
+    if noisy then println("")
     b
 
   /** Test entailment for the knowledge base. Always prints. */
   def ⊩(as: AxiomSet): Boolean = |-!(as)
 
   /** Print the knowledge base. */
-  def show: Unit = println(this.toString ++ "\n")
+  def show: Unit = 
+    if noisy then println(this.toString ++ "\n")
 
   override def toString: String =
     s"-- $name --\n" ++
@@ -82,13 +90,13 @@ case class KnowledgeBase(
 
   /** Check for entailment and output results (if out is set). */
   private def doEntails(r: KnowledgeBase, a: Axiom, out: Boolean): Boolean =
-    if out then
+    if noisy && out then
       print(r.name)
       print(" ⊢ ")
       print(a.show)
       print(" : ")
     val res = r.prove(a)
-    if out then println(res)
+    if noisy && out then println(res)
     res
 
   /** The set of axioms. */

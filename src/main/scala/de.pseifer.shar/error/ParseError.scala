@@ -13,7 +13,16 @@ case class TypeParseError(reason: String = "")
 object TypeParseError:
   def format(reason: String) = reason
 
+/** A parsing error on malformed prefix definitions.
+  */
+case class AxiomParseError(reason: String = "")
+    extends ParseError(AxiomParseError.format(reason))
+
+object AxiomParseError:
+  def format(reason: String) = reason
+
 /*
+ *
 /**
  * Error while encoding some value to String.
  */

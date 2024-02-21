@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# If in deployed project, run from 'bin' folder.
+if [ -d "bin" ]; then
+	if command -v "rlwrap" &>/dev/null; then
+		rlwrap ./bin/shar "$@"
+	else
+		./bin/shar "$@"
+	fi
+# Otherwise, run from local build.
+else
+	# Build first, if required.
+	if [ ! -d "target/universal/stage/bin/" ]; then
+		sbt stage
+	fi
+	# Run shapes 2 shapes, forward arguments.
+	if command -v "rlwrap" &>/dev/null; then
+		rlwrap ./target/universal/stage/bin/shar "$@"
+	else
+		./target/universal/stage/bin/shar "$@"
+	fi
+fi
