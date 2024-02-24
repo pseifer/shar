@@ -106,7 +106,47 @@ Let's next call ```./shar --repl resources/kb.shar```. This will throw us into a
 
 ### Command Line Interface
 
-TBD
+We present the command line interface of *SHAR* by example. We start with printing helpful information about the CLI:
+
+```sh
+./shar --help
+```
+
+Usually, a REPL session is started when the flag ```--repl``` is supplied. However, in some cases (e.g., when no script file, no entailment test, and no command is supplied), *SHAR* will automatically launch a REPL.
+
+```sh
+./shar --repl
+```
+
+Start a REPL session, loading axioms from ```resources/kb.shar```:
+
+```sh
+./shar --repl resources/kb.shar
+```
+
+Run a script file (without starting a REPL) and possibly produce output (running commands in the script, if any). Return, as exit code, the result of the final entailment or satisfiability test, if any:
+
+```sh
+./shar resources/example.shar
+```
+
+Load axioms from a file but supress any output; terminate with exit code depending on the entailment of the supplied axiom:
+
+```sh
+./shar --silent resources/kb.shar --entails ":NiceChild ⊑ ∃:knows.:Agent"
+```
+
+Start a REPL session, loading the [Wine](https://www.w3.org/TR/owl-guide/wine.rdf) ontology and an appropriate default prefix, defined in SPARQL syntax in the file [wine.prefix](resources/wine.prefix):
+
+```sh
+./shar --owl "https://www.w3.org/TR/owl-guide/wine.rdf" --prefixes resources/wine.prefix
+```
+
+Do the same as before, but instead of launching a REPL session, prove that RedWine is Wine and terminate with the appropriate exit code.
+
+```sh
+./shar --owl "https://www.w3.org/TR/owl-guide/wine.rdf" --prefixes resources/wine.prefix --entails ":RedWine ⊑ :Wine"
+```
 
 ### Language
 
