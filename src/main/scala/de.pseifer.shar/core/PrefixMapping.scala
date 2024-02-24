@@ -162,14 +162,14 @@ class PrefixMapping:
       case None         => target.encode
       case Some((p, n)) => p.showWith(n)
 
-  private val prefixRegex = """PREFIX\s+([^\s]+)\s+(<[^>]+>)""".r
+  private val prefixRegex = """(PREFIX|prefix)\s+([^\s]+)\s+(<[^>]+>)""".r
 
   private def findPrefixes(query: String): Map[String, String] =
     prefixRegex
       .findAllIn(query)
       .matchData
       .map { m =>
-        m.group(1) -> m.group(2)
+        m.group(2) -> m.group(3)
       }
       .toMap
 

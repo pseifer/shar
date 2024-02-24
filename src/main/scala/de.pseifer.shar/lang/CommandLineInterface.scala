@@ -1,13 +1,17 @@
 package de.pseifer.shar.lang
 
 import org.rogach.scallop._
+import de.pseifer.shar.core.OntologyInitialization
+import de.pseifer.shar.core.EmptyInitialization
+import de.pseifer.shar.core.ReasonerInitialization
+import de.pseifer.shar.core.Iri
+import de.pseifer.shar.error.SharTry
+import de.pseifer.shar.error.IOError
 
-/*
--p | --prefixes       Load prefixes from this file.
--o | --owl            Load OWL ontology from this IRI or FILE.
--e AX | --entails AX  Check entailment of axiom AX and terminate with result.
-- multiple source files.
-*/
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
+import de.pseifer.shar.core.PrefixMapping
 
 /** Command line interface definition. */
 class CommandLineInterface(baseConfiguration: REPLConfig, arguments: Seq[String])
@@ -48,20 +52,83 @@ class CommandLineInterface(baseConfiguration: REPLConfig, arguments: Seq[String]
   val repl =
     toggle(
       default = Some(false),
-      descrYes = "Launch REPL session, even if file is provided."
+      descrYes = "Launch REPL session (even if SHAR files are provided)."
     )
 
-  val sourceFile = trailArg[String](
+  val sourceFiles = trailArg[List[String]](
     required = false,
-    descr = "File to load and execute.",
-    default = Some("")
+    descr = "SHAR file(s) to load and execute.",
+    default = Some(Nil)
   )
+
+  val owl =
+    opt[String](
+      required = false,
+      descr = "OWL ontology to load (must be valid IRI)."
+    )
+
+  val prefixes =
+    opt[String](
+      required = false,
+      descr = "Load prefix definitions from a file (SPARQL syntax)."
+    )
+
+  val entails =
+    opt[String](
+      required = false,
+      descr = "Single axiom to check (after processing scripts)."
+    )
+
+  val command =
+    opt[String](
+      required = false,
+      descr = "Single comman to run (last)."
+    )
 
   verify()
 
-  def toREPLConfig: REPLConfig = baseConfiguration.copy(
-    noisy = noisy(),
-    silent = silent(),
-    infoline = infos
-  )
+  // Load prefix definitions.
+  private def loadPrefixes: SharTry[PrefixMapping] =
+    if prefixes.isDefined then
+      val pref = PrefixMapping.default
+      Try(pref.addFromSource(io.Source.fromFile(prefixes()))) match
+        case Failure(e) => Left(IOError("Invalid prefix file."))
+        case Success(Left(e)) => Left(e)
+        case Success(Right(_)) => Right(pref)
+    else
+      Right(PrefixMapping.default)
+
+  // Load specifically given entails/command.
+  private def givens: Seq[String] =  
+    entails.toOption.toSeq ++ command.toOption.toSeq
+
+  // Load source files, if any, as well s
+  private def loadSources: SharTry[Seq[String]] = 
+    Try(sourceFiles().flatMap(f => io.Source.fromFile(f).getLines.toSeq)) match 
+      case Failure(e) => Left(IOError("Invalid script file(s)."))
+      case Success(s) => Right(s ++ givens)
+  
+  // Load an ontology document.
+  private def loadOntology: SharTry[ReasonerInitialization] = 
+    if owl.isDefined then
+      Iri.makeFromRawIri(owl.toOption.get).map(OntologyInitialization(_))
+    else
+      Right(EmptyInitialization())
+
+  /** Convert the parsed command line to REPL configuration. */
+  def toREPLConfig: SharTry[REPLConfig] = 
+    for 
+      i <- loadOntology
+      s <- loadSources
+      p <- loadPrefixes
+    yield baseConfiguration.copy(
+      noisy = noisy(),
+      silent = silent(),
+      infoline = infos,
+      init = i,
+      script = s,
+      prefixes = p,
+      interactive = repl() || sourceFiles().isEmpty,
+      entailmentMode = sourceFiles().nonEmpty || owl.isDefined
+    )
 

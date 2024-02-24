@@ -1,22 +1,32 @@
 #!/bin/bash
 
+# First, determine if using file watch mode.
+if [ "$1" == "--watch" ]; then
+    if command -v "entr" &>/dev/null; then
+        ls "$2" | entr -c ./shar "$2"
+    else
+        echo "Missing 'entr', please install."
+    fi
+    exit 0
+fi
+
 # If in deployed project, run from 'bin' folder.
 if [ -d "bin" ]; then
-	if command -v "rlwrap" &>/dev/null; then
-		rlwrap ./bin/shar "$@"
-	else
-		./bin/shar "$@"
-	fi
+    if command -v "rlwrap" &>/dev/null; then
+        rlwrap ./bin/shar "$@"
+    else
+        ./bin/shar "$@"
+    fi
 # Otherwise, run from local build.
 else
-	# Build first, if required.
-	if [ ! -d "target/universal/stage/bin/" ]; then
-		sbt stage
-	fi
-	# Run shapes 2 shapes, forward arguments.
-	if command -v "rlwrap" &>/dev/null; then
-		rlwrap ./target/universal/stage/bin/shar "$@"
-	else
-		./target/universal/stage/bin/shar "$@"
-	fi
+    # Build first, if required.
+    if [ ! -d "target/universal/stage/bin/" ]; then
+        sbt stage
+    fi
+    # Run shapes 2 shapes, forward arguments.
+    if command -v "rlwrap" &>/dev/null; then
+        rlwrap ./target/universal/stage/bin/shar "$@"
+    else
+        ./target/universal/stage/bin/shar "$@"
+    fi
 fi

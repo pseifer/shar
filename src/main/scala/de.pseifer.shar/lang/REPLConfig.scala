@@ -13,6 +13,8 @@ import de.pseifer.shar.core.EmptyInitialization
   *   `DLReasoner` is defined
   * @param init
   *   a custom reasoner initialization (e.g., ontology IRI).
+  * @param script
+  *   a sequence of lines to execute.
   * @param prefixes
   *   a custom, predefined prefix mapping
   * @param defaultIsSharPrefix
@@ -22,14 +24,23 @@ import de.pseifer.shar.core.EmptyInitialization
   *   instead of only for certain commands.
   * @param silent
   *   Supress command outputs.
+  * @param interactive
+  *   Launch interactive mode.
+  * @param entailmentMode
+  *   Start in entailmentMode.
+  * @param infoline
+  *   Information to be displayed at launch.
   */
 case class REPLConfig(
     reasoner: ReasonerInitialization => DLReasoner,
     init: ReasonerInitialization,
+    script: Seq[String],
     prefixes: PrefixMapping,
     defaultIsSharPrefix: Boolean,
     noisy: Boolean,
     silent: Boolean,
+    interactive: Boolean,
+    entailmentMode: Boolean,
     infoline: String
 )
 
@@ -42,9 +53,12 @@ object REPLConfig:
     reasoner = HermitReasoner(_),
     init = EmptyInitialization(),
     prefixes = PrefixMapping.default,
+    script = Seq(),
     defaultIsSharPrefix = true,
     noisy = false,
     silent = false,
+    interactive = false,
+    entailmentMode = false,
     infoline = "shar"
  )
 

@@ -124,7 +124,7 @@ object Iri:
   val rdf: Iri = define("<http://www.w3.org/1999/02/22-rdf-syntax-ns#>")
   val rdfs: Iri = define("<http://www.w3.org/2000/01/rdf-schema#>")
   val sh: Iri = define("<http://www.w3.org/ns/shacl#>")
-  val ex: Iri = define("<http://example.org>")
+  val ex: Iri = define("<http://example.org#>")
 
   val rdf_type: Iri = define(
     "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
