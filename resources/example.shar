@@ -1,11 +1,9 @@
--- This is the knowledge base.
+-- This is the knowledge base (and a comment).
 :NiceChild ⊑ :Child ⊓ :Nice
 :Child ⊑ :Person
 :Person ⊑ :Agent
 :Agent ⊑ ∃:knows.:Agent
-info.
 
 -- These are the tests to be performed.
 ⊢ :NiceChild ⊑ ∃:knows.:Agent
--- ⊢ :Agent ⊑ ∃:knows.:NiceChild
 result.

@@ -4,11 +4,18 @@
 
 # Scala + HermiT API and REPL
 
-*SHAR* features a collection of abstract data types for description logic expressions and axioms in a robust API for working with the HermiT reasoner (as well as other OWL-API based reasoners), that includes additional tools such as parsers from two DL notations (formal Unicode-based and an ASCII-only variant). Secondly, *SHAR* is also a REPL and interpreter for working with HermiT (or other Dl reasoners) directly via an external DSL for defining axioms (and/or loading OWl ontologies) and checking axioms for entailment and satisfiability.
+- [The SHAR API](#the-shar-api)
+- [The SHAR REPL](#the-shar-repl)
+  - [Command Line Interface](#command-line-interface)
+  - [Language](#language)
+- [Replacing HermiT](#replacing-hermit)
+- [References and Examples](#references-and-examples)
+
+*SHAR* features a collection of abstract data types for description logic expressions and axioms in a robust API for working with the HermiT reasoner (as well as other OWL-API based reasoners), that includes additional tools such as parsers from two DL notations (formal Unicode-based and an ASCII-only variant). Secondly, *SHAR* is also a REPL and interpreter for working with HermiT (or other DL (OWL-API) reasoners) directly via an external DSL for defining axioms (and/or loading OWL ontologies) and checking axioms for entailment and satisfiability.
 
 ## The SHAR API
 
-*SHAR* features a collection of abstract data types for representing DL concept expressions and axioms, and interacting with reasoners. Consider the following minimal example, where first the *SHAR* framework is initialized (which can keep track of prefixes and similar state-related things) as well as an empty instance of Hermit.
+*SHAR* features a collection of abstract data types for representing DL concept expressions and axioms, and interacting with reasoners. Consider the following minimal example, where first the *SHAR* framework is initialized (which can keep track of prefixes and similar state-related things) as well as an empty instance of Hermit:
 
 ```scala
 @main def example: Unit =
@@ -33,13 +40,14 @@ Next, we create a few IRI from Strings, and then add them to the knowledge base;
     // Add axioms to the KB.
     kb.addAxiom(Subsumption(NamedConcept(c1), NamedConcept(c2)))
     kb.addAxiom(Subsumption(NamedConcept(c2), NamedConcept(c3)))
+
     // Prove entailment of axiom.
     kb.prove(Subsumption(NamedConcept(c1), NamedConcept(c3)))
 
   println(r) // prints Right(true)
 ```
 
-Alternatively, we can also initialize HermiT with an OWL ontology, by giving its IRI to the *SHAR* framework.
+Alternatively, we can also initialize HermiT with an OWL ontology, by giving its IRI to the *SHAR* framework:
 
 ```scala
 @main def exampleOWL: Unit =
@@ -59,8 +67,7 @@ Alternatively, we can also initialize HermiT with an OWL ontology, by giving its
     yield 
       kb.prove(Subsumption(NamedConcept(c1), NamedConcept(c2)))
 
-    println(r)
-
+    println(r) // prints Right(true)
 ```
 
 For a concrete project utilizing the *SHAR* API, see also [From Shapes to Shapes](https://github.com/softlang/s2s).
@@ -79,29 +86,29 @@ For a concrete project utilizing the *SHAR* API, see also [From Shapes to Shapes
 Invoking ```./shar resources/kb.shar``` parses and then loads these four axioms in HermiT, before terminating and printing nothing. Exciting. So let us extend the *SHAR* source file with a few more lines, introducing some addtional commands and entailment checks ([example.shar](resources/example.shar)):
 
 ```
--- This is a comment.
+-- This is the knowledge base (and a comment).
 :NiceChild ⊑ :Child ⊓ :Nice
 :Child ⊑ :Person
 :Person ⊑ :Agent
 :Agent ⊑ ∃:knows.:Agent
 info.
 
--- Axioms prefixed with ⊢ are checked for entailment.
-⊢ :Child ⊑ :Agent
+-- These are the tests to be performed.
+⊢ :NiceChild ⊑ ∃:knows.:Agent
 result.
 ```
 
 Both "info." and "result." are commands. These commands (recognizable from the "." terminating them) perform certain actions, in this case, "info." prints all preceeding, not-yet-printed axioms added to the KB, and "result." prints the results of all preceeding entailment tests that were not yet printed. Another useful command -- when in a REPL session -- is "help." for help and "quit." to quit. Most commands can be shortened to a single letter (e.g., "i." instead of "info."), though this is again mostly useful in the interactive REPL.
 
-The preceeding document, when passed to ```shar``` (```./shar resources/example.shar```), will print all axioms and the entailment result. It will also terminate with return code '0', because the final entailment is true. If we were only interested in the result of this single entailment, we could also call ```shar kb.shar --entails ":Child ⊑ :Agent"``` (with the initial four-lined file, otherwise, we would print stuff) and the exit code would indicate the result. We could also make this again more human-readable by using ```shar kb.shar --entails ":Child ⊑ :Agent" --command "result."```, which will (finally) call the "result." command.
+The preceeding document, when passed to ```shar``` (```./shar resources/example.shar```), will print all axioms and the entailment result. It will also terminate with return code '0', because the final entailment is true. If we were only interested in the result of this single entailment, we could also call ```./shar resources/kb.shar --entails ":Child ⊑ :Agent"``` (with the initial four-lined file, otherwise, we would print stuff) and the exit code would indicate the result. We could also make this again more human-readable by using ```./shar resources/kb.shar --entails ":Child ⊑ :Agent" --command "result."```, which will (finally) call the "result." command.
 
 Let's next call ```./shar --repl resources/kb.shar```. This will throw us into an interactive REPL session, after executing the ```kb.shar``` script, that is, the respective axioms are already loaded. Since we supplied a script file, *SHAR* assumes that we want to be in *entailment mode*: Any axiom we enter at the REPL will be checked for entailment. If we want to add additional axioms instead, we can use the command "normal." to return to *normal mode*, where axioms are added, unless prefixed with "⊢", just as when using a script file. Usually, it is easiest to write axioms to a file, load it into the REPL, and then experiment in *entailment mode*. Of course, all commands are available at the REPL as well.
 
-### The Command Line Interface
+### Command Line Interface
 
 TBD
 
-### The *SHAR* Language
+### Language
 
 TBD
 
