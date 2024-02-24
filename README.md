@@ -106,7 +106,7 @@ Let's next call ```./shar --repl resources/kb.shar```. This will throw us into a
 
 ### Command Line Interface
 
-We present the command line interface of *SHAR* by example. We start with printing helpful information about the CLI:
+We present the command line interface of *SHAR* by example. We start with printing helpful information about the CLI.
 
 ```sh
 ./shar --help
@@ -118,25 +118,25 @@ Usually, a REPL session is started when the flag ```--repl``` is supplied. Howev
 ./shar --repl
 ```
 
-Start a REPL session, loading axioms from ```resources/kb.shar```:
+Start a REPL session, loading axioms from ```resources/kb.shar```.
 
 ```sh
 ./shar --repl resources/kb.shar
 ```
 
-Run a script file (without starting a REPL) and possibly produce output (running commands in the script, if any). Return, as exit code, the result of the final entailment or satisfiability test, if any:
+Run a script file (without starting a REPL) and possibly produce output (running commands in the script, if any). Return, as exit code, the result of the final entailment or satisfiability test, if any.
 
 ```sh
 ./shar resources/example.shar
 ```
 
-Load axioms from a file but supress any output; terminate with exit code depending on the entailment of the supplied axiom:
+Load axioms from a file but supress any output; terminate with exit code depending on the entailment of the supplied axiom.
 
 ```sh
 ./shar --silent resources/kb.shar --entails ":NiceChild ⊑ ∃:knows.:Agent"
 ```
 
-Start a REPL session, loading the [Wine](https://www.w3.org/TR/owl-guide/wine.rdf) ontology and an appropriate default prefix, defined in SPARQL syntax in the file [wine.prefix](resources/wine.prefix):
+Start a REPL session, loading the [Wine](https://www.w3.org/TR/owl-guide/wine.rdf) ontology and an appropriate default prefix, defined in SPARQL syntax in the file [wine.prefix](resources/wine.prefix).
 
 ```sh
 ./shar --owl "https://www.w3.org/TR/owl-guide/wine.rdf" --prefixes resources/wine.prefix
