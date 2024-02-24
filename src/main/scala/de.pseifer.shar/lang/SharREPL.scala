@@ -158,10 +158,10 @@ class SharREPL(config: REPLConfig = REPLConfig.default):
       parseAxiom("≡", Equality(_, _), line)
     else if line.indexOf(" == ") != -1 then
       parseAxiom("==", Equality(_, _), line)
-    else if line.indexOf(" -< ") != -1 then
-      parseRoleAxiom("-<", RoleSubsumption(_, _), line)
-    else if line.indexOf(" >- ") != -1 then
-      parseRoleAxiom(">-", (l, r) => RoleSubsumption(r, l), line)
+    else if line.indexOf(" <- ") != -1 then
+      parseRoleAxiom("<-", RoleSubsumption(_, _), line)
+    else if line.indexOf(" -> ") != -1 then
+      parseRoleAxiom("->", (l, r) => RoleSubsumption(r, l), line)
     else if allowSat then
       parseSatisfiability(line)
     else

@@ -142,7 +142,7 @@ Start a REPL session, loading the [Wine](https://www.w3.org/TR/owl-guide/wine.rd
 ./shar --owl "https://www.w3.org/TR/owl-guide/wine.rdf" --prefixes resources/wine.prefix
 ```
 
-Do the same as before, but instead of launching a REPL session, prove that RedWine is Wine and terminate with the appropriate exit code.
+Do the same as before, but instead of launching a REPL session, prove that RedWine is Wine and terminate with the appropriate exit code. Note, that this makes *SHAR* a useful tool in the context of more general purpose shell scripting.
 
 ```sh
 ./shar --owl "https://www.w3.org/TR/owl-guide/wine.rdf" --prefixes resources/wine.prefix --entails ":RedWine ⊑ :Wine"
@@ -150,7 +150,24 @@ Do the same as before, but instead of launching a REPL session, prove that RedWi
 
 ### Language
 
-TBD
+The *SHAR* DSL has a few basic features, outlined in this section. Each line is processed as one of a few categories: Comments, prefixed with either ```//```, ```#```, or ```--```; commands, terminated with ```.```; entailment tests (in normal mode) prefixed with ```⊢``` or ```:-```; satisfiability tests ending with ``` ?``` (optional); and axioms to be added to the knowledge base (in normal mode; in entailment mode, any axiom is interpreted as an entailment test).
+
+Concept expressions, entailment tests, and axioms can be specified using a formal Unicode-based syntax, or an ASCII-only variant. The correspondence and meaning of each symbol is listed in the following table.
+
+| Symbol Name | ASCII | Unicode |
+|-|-|-|
+| Top | `#t` | `⊤` |
+| Bottom | `#f` | `⊥` |
+| Union | `\|` | `⊔` |
+| Intersection | `&` | `⊓` |
+| Universal | `#A` | `∀` |
+| Existential | `#E` | `∃` |
+| Complement | `!` | `¬` |
+| Inclusion | `<<` | `⊑` |
+| Equivalency | `==` | `≡` |
+| Entailment | `:-` | `⊢` |
+| Inverse (Role) | - | - |
+| Inclusion (Role) | `<-` | `<-` |
 
 ## Replacing HermiT
 
