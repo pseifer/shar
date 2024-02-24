@@ -166,7 +166,7 @@ Concept expressions, entailment tests, and axioms can be specified using a forma
 | Inclusion | `<<` | `⊑` |
 | Equivalency | `==` | `≡` |
 | Entailment | `:-` | `⊢` |
-| Inverse (Role) | - | - |
+| Inverse (Role) | `-` | `-` |
 | Inclusion (Role) | `<-` | `<-` |
 
 ## Replacing HermiT
