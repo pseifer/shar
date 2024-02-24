@@ -180,7 +180,7 @@ class SharREPL(config: REPLConfig = REPLConfig.default):
     parseAxiom(line.stripPrefix("⊢").stripPrefix(":-"), true) match
       case Left(err) =>
         println(err.show)
-        resultCode = 1
+        resultCode = 2
       case Right(axiom) => 
         val result = reasoner.prove(axiom)
         if result then

@@ -100,7 +100,7 @@ class CommandLineInterface(baseConfiguration: REPLConfig, arguments: Seq[String]
 
   // Load specifically given entails/command.
   private def givens: Seq[String] =  
-    entails.toOption.toSeq ++ command.toOption.toSeq
+    entails.toOption.map("⊢ " ++ _).toSeq ++ command.toOption.toSeq
 
   // Load source files, if any, as well s
   private def loadSources: SharTry[Seq[String]] = 
@@ -128,7 +128,7 @@ class CommandLineInterface(baseConfiguration: REPLConfig, arguments: Seq[String]
       init = i,
       script = s,
       prefixes = p,
-      interactive = repl() || sourceFiles().isEmpty,
+      interactive = repl() || (sourceFiles().isEmpty && entails.isEmpty && command.isEmpty),
       entailmentMode = sourceFiles().nonEmpty || owl.isDefined
     )
 
