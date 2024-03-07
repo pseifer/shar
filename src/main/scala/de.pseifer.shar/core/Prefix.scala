@@ -40,6 +40,8 @@ object Prefix:
 
   private def define(str: String): Prefix =
     fromString(str).toOption.get
+  
+  val default: Prefix = define(":")
 
   val xsd: Prefix = define("xsd:")
   val owl: Prefix = define("owl:")

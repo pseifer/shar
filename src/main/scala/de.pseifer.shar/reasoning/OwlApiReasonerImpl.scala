@@ -6,14 +6,14 @@ import de.pseifer.shar.core.OntologyInitialization
 import de.pseifer.shar.core.ReasonerInitialization
 import de.pseifer.shar.dl._
 import org.semanticweb.owlapi.apibinding.OWLManager
-import org.semanticweb.owlapi.io.OWLXMLOntologyFormat
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat 
 import org.semanticweb.owlapi.model._
 import org.semanticweb.owlapi.reasoner.Node
 import org.semanticweb.owlapi.reasoner.OWLReasoner
 import uk.ac.manchester.cs.owl.owlapi.OWLNamedIndividualImpl
 
 import java.io.File
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.SetHasAsJava
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration
 
 /** A description logics reasoner using OWL API. */
@@ -105,7 +105,7 @@ abstract class OwlApiReasonerImpl(
       val iri = IRI.create(file)
       manager.saveOntology(
         ontology,
-        OWLXMLOntologyFormat(),
+        OWLXMLDocumentFormat(),
         IRI.create(file.toURI)
       )
       true

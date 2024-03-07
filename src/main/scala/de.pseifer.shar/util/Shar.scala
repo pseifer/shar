@@ -2,6 +2,10 @@ package de.pseifer.shar
 
 import de.pseifer.shar.core._
 
+import de.pseifer.shar.reasoning.HermitReasoner
+import de.pseifer.shar.reasoning.HermitConfiguration
+import de.pseifer.shar.reasoning.DLReasoner
+
 /** A wrapper and constructor for state.
   *
   * @param init
@@ -15,3 +19,10 @@ class Shar(
 ):
 
   implicit val state: BackendState = BackendState(init, prefixes)
+
+  /** Get a fresh hermit instance. */
+  def mkHermit(config: HermitConfiguration = HermitConfiguration()): HermitReasoner = 
+    HermitReasoner(init, config)
+
+  /** Get a fresh reasoner instance from mk. */
+  def mkReasoner(mk: ReasonerInitialization => DLReasoner): DLReasoner = mk(init)
