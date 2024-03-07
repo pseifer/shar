@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="768" height="320" src="resources/shar-logo.svg?raw=true">
+  <img width="768" height="247" src="resources/shar.png?raw=true">
 </p>
 
 # Scala + HermiT API and REPL
