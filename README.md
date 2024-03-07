@@ -148,6 +148,12 @@ Do the same as before, but instead of launching a REPL session, prove that RedWi
 ./shar --owl "https://www.w3.org/TR/owl-guide/wine.rdf" --prefixes resources/wine.prefix --entails ":RedWine ⊑ :Wine"
 ```
 
+A bonus feature of the launcher script allows for watching a file for changes and refreshing *SHAR*, by relaunching it automatically. This requires the utility tool `entr` and is only supported on GNU/Linux and macOS systems (and possible other UNIX or UNIX-like systems).
+
+```sh
+./shar --watch resources/example.shar
+```
+
 ### Language
 
 The *SHAR* DSL has a few basic features, outlined in this section. Each line is processed as one of a few categories: Comments, prefixed with either ```//```, ```#```, or ```--```; commands, terminated with ```.```; entailment tests (in normal mode) prefixed with ```⊢``` or ```:-```; satisfiability tests ending with ``` ?``` (optional); and axioms to be added to the knowledge base (in normal mode; in entailment mode, any axiom is interpreted as an entailment test).
