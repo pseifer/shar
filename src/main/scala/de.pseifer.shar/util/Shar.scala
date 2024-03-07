@@ -1,4 +1,4 @@
-package de.pseifer.shar.util
+package de.pseifer.shar
 
 import de.pseifer.shar.core._
 

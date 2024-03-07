@@ -5,7 +5,9 @@ import de.pseifer.shar.dl._
 import de.pseifer.shar.error._
 import de.pseifer.shar.reasoning._
 import de.pseifer.shar.parsing._
-import de.pseifer.shar.util._
+
+import de.pseifer.shar.Shar
+import de.pseifer.shar.AxiomSetBuilder
 
 import scala.io.StdIn._
 

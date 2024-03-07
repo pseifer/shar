@@ -13,7 +13,7 @@ import de.pseifer.shar.error._
 
 import de.pseifer.shar.core.BackendState
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.language.implicitConversions
 
 import org.antlr.v4.runtime._
