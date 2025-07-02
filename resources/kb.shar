@@ -1,4 +1,0 @@
-:NiceChild ⊑ :Child ⊓ :Nice
-:Child ⊑ :Person
-:Person ⊑ :Agent
-:Agent ⊑ ∃:knows.:Agent
