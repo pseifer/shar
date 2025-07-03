@@ -1,33 +1,10 @@
 package de.pseifer.shar.test
 
-import de.pseifer.shar.Shar
-
-import de.pseifer.shar.core._
 import de.pseifer.shar.dl._
-//import de.pseifer.shar.error.SharTry
 
-//import org.scalacheck._
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class ConceptTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
-
-  // Configure ScalaCheck to run with N samples.
-  implicit override val generatorDrivenConfig =
-    PropertyCheckConfiguration(minSuccessful = 1000)
-
-  private val shar = Shar()
-  import shar._
-  val hermit = shar.mkHermit()
-
-  // Construct an axiom from a String.
-  def force[C](s: String, c: Iri => C): C =
-    c(
-      Iri
-        .fromString("<https://github.com/pseifer/shar/ontology/" ++ s ++ ">")
-        .toOption
-        .get
-    )
+class ConceptTests extends AnyFlatSpec with TestConfig:
 
   "Mapping identity over a concept" should "produce the same concept" in:
     forAll(SharGen.genConcept): c =>
@@ -55,32 +32,66 @@ class ConceptTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
       assert(c == c)
 
   "A concept" should "be reasoning-equal to itself" in:
+    val hermit = shar.mkHermit()
     forAll(SharGen.genConcept): c =>
       assert(hermit.prove(Equality(c, c)))
 
   "A concept" should "be reasoning-equal to its simplification" in:
+    val hermit = shar.mkHermit()
     forAll(SharGen.genConcept): c =>
       assert(hermit.prove(Equality(c, Concept.simplify(c))))
 
   "unionOf" should "produce the correct union" in:
     assert(Concept.unionOf(Nil) == Bottom)
-    val c = SharGen.namedSamples(0)
+    val c = Samples.namedConcept(0)
     assert(Concept.unionOf(List(c)) == c)
-    val d = SharGen.namedSamples(1)
+    val d = Samples.namedConcept(1)
     assert(Concept.unionOf(List(c, d)) == Union(c, d))
-    val e = SharGen.namedSamples(2)
+    val e = Samples.namedConcept(2)
     assert(Concept.unionOf(List(c, d, e)) == Union(Union(c, d), e))
 
   "intersectionOf" should "produce the correct intersection" in:
     assert(Concept.intersectionOf(Nil) == Top)
-    val c = SharGen.namedSamples(0)
+    val c = Samples.namedConcept(0)
     assert(Concept.intersectionOf(List(c)) == c)
-    val d = SharGen.namedSamples(1)
+    val d = Samples.namedConcept(1)
     assert(Concept.intersectionOf(List(c, d)) == Intersection(c, d))
-    val e = SharGen.namedSamples(2)
+    val e = Samples.namedConcept(2)
     assert(
       Concept.intersectionOf(List(c, d, e)) == Intersection(
         Intersection(c, d),
         e
       )
     )
+
+  "Concepts" should "contain the correct concepts and properties" in:
+    val c = Samples.namedConcept(0)
+    val d = Samples.namedConcept(1)
+    val e = Samples.namedConcept(2)
+    val f = Samples.namedConcept(3)
+    val r = Samples.role(0)
+    val s = Samples.role(0)
+    assert(c.concepts == Set(c.c))
+    assert(Union(c, d).concepts == Set(c.c, d.c))
+    assert(Intersection(c, d).concepts == Set(c.c, d.c))
+    assert(Complement(c).concepts == Set(c.c))
+    assert(GreaterThan(1, r, c).concepts == Set(c.c))
+    assert(LessThan(4, r, c).concepts == Set(c.c))
+    assert(Exactly(42, r, c).concepts == Set(c.c))
+    val big =
+      Union(
+        Intersection(Complement(c), d),
+        Union(Existential(r, e), Complement(Universal(s, f)))
+      )
+    assert(
+      big.concepts == Set(
+        c.c,
+        d.c,
+        e.c,
+        f.c
+      )
+    )
+    assert(GreaterThan(1, r, c).properties == Set(r.r))
+    assert(LessThan(4, r, c).properties == Set(r.r))
+    assert(Exactly(42, r, c).properties == Set(r.r))
+    assert(big.properties == Set(r.r, s.r))

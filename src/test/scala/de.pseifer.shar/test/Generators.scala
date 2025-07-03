@@ -1,9 +1,5 @@
 package de.pseifer.shar.test
 
-// TODO: QuickCheck: Generate, pretty print, parse, check - loop
-// Also use to test simplification, inference, mapping, foreach, etc.
-
-import de.pseifer.shar.core._
 import de.pseifer.shar.dl._
 
 import org.scalacheck._
@@ -20,35 +16,11 @@ object SharGen:
 
   def genBottom: Gen[Concept] = const(Bottom)
 
-  val nominalSamples: List[Concept] = List(
-    NominalConcept(mkIri("a")),
-    NominalConcept(mkIri("b")),
-    NominalConcept(mkIri("c")),
-    NominalConcept(mkIri("d")),
-    NominalConcept(mkIri("e"))
-  )
+  def genKnownNominal: Gen[Concept] = oneOf(Samples.nominal)
 
-  def genKnownNominal: Gen[Concept] = oneOf(nominalSamples)
+  def genKnownNamed: Gen[Concept] = oneOf(Samples.namedConcept)
 
-  val namedSamples: List[Concept] = List(
-    NamedConcept(mkIri("A")),
-    NamedConcept(mkIri("B")),
-    NamedConcept(mkIri("C")),
-    NamedConcept(mkIri("D")),
-    NamedConcept(mkIri("E"))
-  )
-
-  def genKnownNamed: Gen[Concept] = oneOf(namedSamples)
-
-  val roleSamples: List[Role] = List(
-    NamedRole(mkIri("r")),
-    NamedRole(mkIri("p")),
-    NamedRole(mkIri("q")),
-    NamedRole(mkIri("s")),
-    NamedRole(mkIri("t"))
-  )
-
-  def genKnownRole: Gen[Role] = oneOf(roleSamples)
+  def genKnownRole: Gen[Role] = oneOf(Samples.role)
 
   def genInverseRole: Gen[Role] =
     for r <- genKnownRole
@@ -136,9 +108,3 @@ object SharGen:
       (10, lzy(genUnion(genHugeConcept))),
       (10, lzy(genIntersection(genHugeConcept)))
     )
-
-  private def mkIri(s: String): Iri =
-    Iri
-      .fromString("<https://github.com/pseifer/shar/ontology/" ++ s ++ ">")
-      .toOption
-      .get

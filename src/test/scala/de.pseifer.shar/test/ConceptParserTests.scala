@@ -1,40 +1,14 @@
 package de.pseifer.shar.test
 
-import de.pseifer.shar.Shar
-
-import de.pseifer.shar.core._
 import de.pseifer.shar.dl._
 import de.pseifer.shar.error.SharTry
-
 import de.pseifer.shar.parsing.ConceptParser
 
-import org.scalacheck._
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
+class ConceptParserTests extends AnyFlatSpec with TestConfig:
 
-  // Configure ScalaCheck to run with N samples.
-  implicit override val generatorDrivenConfig =
-    PropertyCheckConfiguration(minSuccessful = 10000)
-
-  // Instantiate shar and the parser.
-
-  private val shar = Shar()
-  import shar._
-
-  val parser = ConceptParser(state)
-
-  // Construct a valid parse result from a String and Constructor.
-  def force[C](s: String, c: Iri => C): SharTry[C] =
-    Right(
-      c(
-        Iri
-          .fromString("<https://github.com/pseifer/shar/ontology/" ++ s ++ ">")
-          .toOption
-          .get
-      )
-    )
+  val parser = ConceptParser(shar.state)
 
   // Parse multiple Strings against the same target.
   def alternatives[C](target: C, variants: String*) =
@@ -47,8 +21,6 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   // Assert that a String 's' parses correctly.
   def success(s: String): Unit =
     assert(parser.parse(s).isRight)
-
-  // ==========================================================================
 
   "Parsing invalid concept names" should "fail" in:
     // Invalid tokens.
@@ -78,7 +50,7 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
 
   "A named concept" should "parse as NamedConcept" in:
     alternatives(
-      force("Person", NamedConcept.apply),
+      Right(force("Person", NamedConcept.apply)),
       "shar:Person",
       "(shar:Person)",
       "( shar:Person )",
@@ -88,7 +60,7 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
 
   "A nominal concept" should "parse as NominalConcept" in:
     alternatives(
-      force("tim", NominalConcept.apply),
+      Right(force("tim", NominalConcept.apply)),
       "{shar:tim}",
       "{ shar:tim }",
       " {shar:tim} ",
@@ -99,8 +71,8 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   "Existential role restrictions" should "parse as Existstential" in:
     alternatives(
       for
-        c <- force("Person", NamedConcept.apply)
-        r <- force("knows", NamedRole.apply)
+        c <- Right(force("Person", NamedConcept.apply))
+        r <- Right(force("knows", NamedRole.apply))
       yield Existential(r, c),
       "∃shar:knows.shar:Person",
       "∃ shar:knows . shar:Person",
@@ -113,8 +85,8 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   "Universal role restrictions" should "parse as Universal" in:
     alternatives(
       for
-        c <- force("Person", NamedConcept.apply)
-        r <- force("knows", NamedRole.apply)
+        c <- Right(force("Person", NamedConcept.apply))
+        r <- Right(force("knows", NamedRole.apply))
       yield Universal(r, c),
       "∀shar:knows.shar:Person",
       "∀ shar:knows . shar:Person",
@@ -127,8 +99,8 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   ">= restrictions" should "parse as GreaterThan" in:
     alternatives(
       for
-        c <- force("Person", NamedConcept.apply)
-        r <- force("knows", NamedRole.apply)
+        c <- Right(force("Person", NamedConcept.apply))
+        r <- Right(force("knows", NamedRole.apply))
       yield GreaterThan(42, r, c),
       "≥42shar:knows.shar:Person",
       "≥42 shar:knows . shar:Person",
@@ -143,8 +115,8 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   "<= restrictions" should "parse as LessThan" in:
     alternatives(
       for
-        c <- force("Person", NamedConcept.apply)
-        r <- force("knows", NamedRole.apply)
+        c <- Right(force("Person", NamedConcept.apply))
+        r <- Right(force("knows", NamedRole.apply))
       yield LessThan(42, r, c),
       "≤42shar:knows.shar:Person",
       "≤42 shar:knows . shar:Person",
@@ -159,8 +131,8 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   "== restrictions" should "parse as Exactly" in:
     alternatives(
       for
-        c <- force("Person", NamedConcept.apply)
-        r <- force("knows", NamedRole.apply)
+        c <- Right(force("Person", NamedConcept.apply))
+        r <- Right(force("knows", NamedRole.apply))
       yield Exactly(42, r, c),
       "=42shar:knows.shar:Person",
       "=42 shar:knows . shar:Person",
@@ -174,7 +146,7 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
 
   "Complementary concepts" should "parse as Complement" in:
     alternatives(
-      for c <- force("Person", NamedConcept.apply)
+      for c <- Right(force("Person", NamedConcept.apply))
       yield Complement(c),
       "¬shar:Person",
       "¬(shar:Person)",
@@ -193,8 +165,8 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   "The union of two concepts" should "parse as Union" in:
     alternatives(
       for
-        c1 <- force("Person", NamedConcept.apply)
-        c2 <- force("Agent", NamedConcept.apply)
+        c1 <- Right(force("Person", NamedConcept.apply))
+        c2 <- Right(force("Agent", NamedConcept.apply))
       yield Union(c1, c2),
       "shar:Person⊔shar:Agent",
       "shar:Person ⊔ shar:Agent",
@@ -209,8 +181,8 @@ class ConceptParserTests extends AnyFlatSpec with ScalaCheckPropertyChecks:
   "The intersection of two concepts" should "parse as Intersection" in:
     alternatives(
       for
-        c1 <- force("Person", NamedConcept.apply)
-        c2 <- force("Agent", NamedConcept.apply)
+        c1 <- Right(force("Person", NamedConcept.apply))
+        c2 <- Right(force("Agent", NamedConcept.apply))
       yield Intersection(c1, c2),
       "shar:Person⊓shar:Agent",
       "shar:Person ⊓ shar:Agent",
