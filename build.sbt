@@ -11,7 +11,7 @@ lazy val root = project
     homepage := Some(url("https://shar.pseifer.de")),
     startYear := Some(2018),
     description := "An algebraic Scala wrapper around OWL API",
-    licenses += "GPLv2" -> url("https://www.gnu.org/licenses/gpl-2.0.html"),
+    licenses += "MIT" -> url("https://mit-license.org/"),
     scalaVersion := scala3Version,
     scalacOptions ++= Seq(
       "-encoding",
