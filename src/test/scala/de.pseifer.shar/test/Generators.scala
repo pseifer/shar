@@ -20,7 +20,7 @@ object SharGen:
 
   def genBottom: Gen[Concept] = const(Bottom)
 
-  def genKnownNominal: Gen[Concept] = oneOf(
+  val nominalSamples: List[Concept] = List(
     NominalConcept(mkIri("a")),
     NominalConcept(mkIri("b")),
     NominalConcept(mkIri("c")),
@@ -28,7 +28,9 @@ object SharGen:
     NominalConcept(mkIri("e"))
   )
 
-  def genKnownNamed: Gen[Concept] = oneOf(
+  def genKnownNominal: Gen[Concept] = oneOf(nominalSamples)
+
+  val namedSamples: List[Concept] = List(
     NamedConcept(mkIri("A")),
     NamedConcept(mkIri("B")),
     NamedConcept(mkIri("C")),
@@ -36,13 +38,17 @@ object SharGen:
     NamedConcept(mkIri("E"))
   )
 
-  def genKnownRole: Gen[Role] = oneOf(
+  def genKnownNamed: Gen[Concept] = oneOf(namedSamples)
+
+  val roleSamples: List[Role] = List(
     NamedRole(mkIri("r")),
     NamedRole(mkIri("p")),
     NamedRole(mkIri("q")),
     NamedRole(mkIri("s")),
     NamedRole(mkIri("t"))
   )
+
+  def genKnownRole: Gen[Role] = oneOf(roleSamples)
 
   def genInverseRole: Gen[Role] =
     for r <- genKnownRole
@@ -53,7 +59,7 @@ object SharGen:
 
   def genQualifiedNumberRestriction(gC: Gen[Concept]): Gen[Concept] =
     for
-      n <- oneOf(0, 2, 42, 101, 1000000)
+      n <- oneOf(0, 1, 2, 3)
       op <- oneOf(GreaterThan.apply, LessThan.apply, Exactly.apply)
       r <- genRole
       c <- gC

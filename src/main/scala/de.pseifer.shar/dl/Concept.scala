@@ -11,6 +11,12 @@ sealed trait Concept extends DLExpression:
   def concepts: Set[Iri] = Set()
   def properties: Set[Iri] = Set()
 
+  def map(f: Concept => Concept): Concept =
+    Concept.map(f, this)
+
+  def foreach(proc: Concept => Unit): Unit =
+    Concept.foreach(proc, this)
+
 /** The Concept Top, printing as ⊤.
   */
 case object Top extends Concept:
