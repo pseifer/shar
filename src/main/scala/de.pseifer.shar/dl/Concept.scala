@@ -53,6 +53,7 @@ final case class Complement(concept: Concept) extends Concept:
     "¬(" + inner + ")"
 
   override def concepts: Set[Iri] = concept.concepts
+  override def properties: Set[Iri] = concept.properties
 
 /** The union of two concepts C and D, printing as C ⊔ D.
   */
