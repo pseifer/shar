@@ -32,6 +32,11 @@ lazy val root = project
       "-Wunused:privates",
       "-Xfatal-warnings"
     ),
+    // Disable some warnings for tests, specifically.
+    Test / scalacOptions --= Seq(
+      "-Wvalue-discard",
+      "-Wnonunit-statement"
+    ),
     // Settings for Antlr4.
     Antlr4 / antlr4Version := "4.7.2",
     Antlr4 / antlr4GenVisitor := true,
