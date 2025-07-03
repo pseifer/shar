@@ -6,6 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class ConceptTests extends AnyFlatSpec with TestConfig:
 
+  // For systematic tests of encode(), refer to ConceptParserTests.scala
+
   "Mapping identity over a concept" should "produce the same concept" in:
     forAll(SharGen.genConcept): c =>
       assert(c.map(identity) == c)
@@ -78,10 +80,11 @@ class ConceptTests extends AnyFlatSpec with TestConfig:
     assert(GreaterThan(1, r, c).concepts == Set(c.c))
     assert(LessThan(4, r, c).concepts == Set(c.c))
     assert(Exactly(42, r, c).concepts == Set(c.c))
+
     val big =
       Union(
         Intersection(Complement(c), d),
-        Union(Existential(r, e), Complement(Universal(s, f)))
+        Union(Existential(Inverse(r), e), Complement(Universal(s, f)))
       )
     assert(
       big.concepts == Set(
@@ -91,7 +94,11 @@ class ConceptTests extends AnyFlatSpec with TestConfig:
         f.c
       )
     )
+
     assert(GreaterThan(1, r, c).properties == Set(r.r))
     assert(LessThan(4, r, c).properties == Set(r.r))
     assert(Exactly(42, r, c).properties == Set(r.r))
     assert(big.properties == Set(r.r, s.r))
+
+    assert(Exactly(42, Inverse(r), c).properties == Set(r.r))
+    assert(Existential(Inverse(r), c).properties == Set(r.r))
