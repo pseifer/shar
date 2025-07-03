@@ -49,5 +49,6 @@ lazy val root = project
     libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.12" % Runtime,
     // Testing
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
-    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.18.1" % Test,
+    libraryDependencies += "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % Test
   )
