@@ -68,7 +68,7 @@ class ConceptParser(state: BackendState)
         rhs <- visit(ctx.getChild(3))
         r <- Role.orElse(role, ierr("visitQuantification"))
         c <- Concept.orElse(rhs, ierr("visitQuantification"))
-      yield t(ctx.getChild(0).toString.drop(2).toInt, r, c)
+      yield t(ctx.getChild(0).toString.filter(_.isDigit).toInt, r, c)
 
     /** Visit any quantification.
       */

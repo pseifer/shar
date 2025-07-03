@@ -90,7 +90,7 @@ final case class GreaterThan(n: Int, role: Role, rhs: Concept) extends Concept:
   override def show(implicit state: BackendState): String =
     format(role.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
-    ">=" ++ n.toString ++ " " ++ left ++ "." + right
+    "≥" ++ n.toString ++ " " ++ left ++ ".(" + right + ")"
 
   override def concepts: Set[Iri] = rhs.concepts
   override def properties: Set[Iri] = role.properties
@@ -105,7 +105,7 @@ final case class LessThan(n: Int, role: Role, rhs: Concept)
   override def show(implicit state: BackendState): String =
     format(role.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
-    "<=" ++ n.toString ++ " " ++ left ++ "." + right
+    "≤" ++ n.toString ++ " " ++ left ++ ".(" + right + ")"
 
 /** A qualified number restriction, requiring exactly n role names r to the
   * concept C, printing as ==n r.C.
@@ -121,7 +121,7 @@ final case class Exactly(n: Int, role: Role, rhs: Concept)
   override def show(implicit state: BackendState): String =
     format(role.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
-    "==" ++ n.toString ++ " " ++ left ++ "." + right
+    "=" ++ n.toString ++ " " ++ left ++ ".(" + right + ")"
 
 /** The existential restriction, requiring at least 1 role name r to the concept
   * C, printing as ∃ r.C.
@@ -145,7 +145,7 @@ final case class Universal(role: Role, rhs: Concept)
   override def show(implicit state: BackendState): String =
     format(role.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
-    "∀" ++ left ++ "." + right
+    "∀" ++ left ++ ".(" + right + ")"
 
 object Concept:
 

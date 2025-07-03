@@ -73,11 +73,11 @@ NAME: CHARACTER+;
 
 /* TOKEN */
 
-GREATER: '>=' NUMBER;
+GREATER: '#>' NUMBER | '≥' NUMBER;
 
-LESS: '<=' NUMBER;
+LESS: '#<' NUMBER | '≤' NUMBER;
 
-EXACTLY: '==' NUMBER;
+EXACTLY: '#=' NUMBER  | '=' NUMBER;
 
 NUMBER: ('0' .. '9')+;
 
