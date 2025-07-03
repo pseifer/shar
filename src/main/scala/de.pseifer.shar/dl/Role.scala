@@ -12,6 +12,9 @@ sealed trait Role extends DLExpression:
   def concepts: Set[Iri] = Set()
 
 object Role:
+  /** Helper function for constructing internal parse errors, lifting
+    * DLExpressions to Role, or a given SharError (if they are not Role).
+    */
   def orElse(expr: DLExpression, error: SharError): SharTry[Role] =
     expr match
       case c: Role => Right(c)
@@ -33,10 +36,3 @@ case class Inverse(role: Role) extends Role:
     "-" + role.show(state)
 
   def properties: Set[Iri] = role.properties
-
-///**
-// * data-role 'r'
-// */
-//case class Data(r: Iri) extends Role
-//  def encode: String = r.encode
-//  override def show(state: BackendState): String = r.show(state)

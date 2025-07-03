@@ -13,17 +13,17 @@ sealed trait Concept extends DLExpression:
   def concepts: Set[Iri] = Set()
   def properties: Set[Iri] = Set()
 
-/** ⊤
+/** The Concept Top, printing as ⊤.
   */
 case object Top extends Concept:
   def encode: String = "⊤"
 
-/** ⊥
+/** The Concept Bottom, printing as ⊥.
   */
 case object Bottom extends Concept:
   def encode: String = "⊥"
 
-/** <'c'>
+/** A named concept <'c'>.
   */
 final case class NamedConcept(c: Iri) extends Concept:
   def encode: String = c.encode
@@ -31,7 +31,14 @@ final case class NamedConcept(c: Iri) extends Concept:
 
   override def concepts: Set[Iri] = Set(c)
 
-/** ¬ 'concept'
+/** A nominal concept, printing as {<'name'>}.
+  */
+final case class NominalConcept(name: Iri) extends Concept:
+  def encode: String = "{" ++ name.encode ++ "}"
+  override def show(implicit state: BackendState): String =
+    "{" ++ name.show(state) ++ "}"
+
+/** The complement of any concept C, printing as ¬C.
   */
 final case class Complement(concept: Concept) extends Concept:
   def encode: String = format(concept.encode)
@@ -43,14 +50,7 @@ final case class Complement(concept: Concept) extends Concept:
 
   override def concepts: Set[Iri] = concept.concepts
 
-/** {<'name'>}
-  */
-final case class NominalConcept(name: Iri) extends Concept:
-  def encode: String = "{" ++ name.encode ++ "}"
-  override def show(implicit state: BackendState): String =
-    "{" ++ name.show(state) ++ "}"
-
-/** 'lhs' ⊔ 'rhs'
+/** The union of two concepts C and D, printing as C ⊔ D.
   */
 final case class Union(lhs: Concept, rhs: Concept) extends Concept:
   def encode: String = format(lhs.encode, rhs.encode)
@@ -62,7 +62,7 @@ final case class Union(lhs: Concept, rhs: Concept) extends Concept:
   override def concepts: Set[Iri] = lhs.concepts.union(rhs.concepts)
   override def properties: Set[Iri] = lhs.properties.union(rhs.properties)
 
-/** 'lhs' ⊓ 'rhs'
+/** The intersection of two concepts C and D, printing as C ⊓ D.
   */
 final case class Intersection(lhs: Concept, rhs: Concept) extends Concept:
   def encode: String = format(lhs.encode, rhs.encode)
@@ -78,12 +78,13 @@ final case class Intersection(lhs: Concept, rhs: Concept) extends Concept:
   * at some stages to keep user representation identical, but all
   * NumberRestrictions can be transformed to a basic GreaterThan form.
   */
-trait DerivedNumberRestriction extends Concept:
+sealed trait DerivedNumberRestriction extends Concept:
   def toGreaterThan: Concept
   override def concepts: Set[Iri] = this.toGreaterThan.concepts
   override def properties: Set[Iri] = this.toGreaterThan.properties
 
-/** >=n 'role' . 'rhs' Number restriction
+/** A qualified number restriction, requiring at least n role names r to the
+  * concept C, printing as >=n r.C.
   */
 final case class GreaterThan(n: Int, role: Role, rhs: Concept) extends Concept:
   def toGreaterThan = this
@@ -96,7 +97,8 @@ final case class GreaterThan(n: Int, role: Role, rhs: Concept) extends Concept:
   override def concepts: Set[Iri] = rhs.concepts
   override def properties: Set[Iri] = role.properties
 
-/** <=n 'role' . 'rhs' Number restriction
+/** A qualified number restriction, requiring at most n role names r to the
+  * concept C, printing as <=n r.C.
   */
 final case class LessThan(n: Int, role: Role, rhs: Concept)
     extends DerivedNumberRestriction:
@@ -107,19 +109,24 @@ final case class LessThan(n: Int, role: Role, rhs: Concept)
   private def format(left: String, right: String): String =
     "<=" ++ n.toString ++ " " ++ left ++ "." + right
 
-/** ==n 'role' . 'rhs'
+/** A qualified number restriction, requiring exactly n role names r to the
+  * concept C, printing as ==n r.C.
   */
 final case class Exactly(n: Int, role: Role, rhs: Concept)
     extends DerivedNumberRestriction:
   def toGreaterThan =
-    Intersection(GreaterThan(n, role, rhs), LessThan(n, role, rhs))
+    Intersection(
+      GreaterThan(n, role, rhs),
+      LessThan(n, role, rhs).toGreaterThan
+    )
   def encode: String = format(role.encode, rhs.encode)
   override def show(implicit state: BackendState): String =
     format(role.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
     "==" ++ n.toString ++ " " ++ left ++ "." + right
 
-/** ∃ 'role' . 'rhs'
+/** The existential restriction, requiring at least 1 role name r to the concept
+  * C, printing as ∃ r.C.
   */
 final case class Existential(role: Role, rhs: Concept)
     extends DerivedNumberRestriction:
@@ -128,9 +135,10 @@ final case class Existential(role: Role, rhs: Concept)
   override def show(implicit state: BackendState): String =
     format(role.show(state), rhs.show(state))
   private def format(left: String, right: String): String =
-    "∃" ++ left ++ "." + right
+    "∃" ++ left ++ ".(" + right + ")"
 
-/** ∀ 'role' . 'rhs'
+/** The universal restriction, requiring for all role names r the concept C,
+  * printing as ∀ r.C.
   */
 final case class Universal(role: Role, rhs: Concept)
     extends DerivedNumberRestriction:
@@ -143,64 +151,88 @@ final case class Universal(role: Role, rhs: Concept)
 
 object Concept:
 
+  /** Helper function for constructing internal parse errors, lifting
+    * DLExpressions to Concept, or a given SharError (if they are not Concept).
+    */
   def orElse(expr: DLExpression, error: SharError): SharTry[Concept] =
     expr match
       case c: Concept => Right(c)
       case _          => Left(error)
 
+  /** Defines the Intersection of the given list of concepts. Returns Top for
+    * empty lists.
+    */
   def intersectionOf(cs: List[Concept]): Concept =
     simplify(cs.foldLeft(Top: Concept)(Intersection.apply))
 
+  /** Defines the Union of the given list of concepts. Returns Bottom for empty
+    * lists.
+    */
   def unionOf(cs: List[Concept]): Concept =
     simplify(cs.foldLeft(Bottom: Concept)(Union.apply))
 
-  //def hasDefined(c: Concept, defcon: DefinedConcept): Boolean =
-  //  var flag: Boolean = false
-  //  def isTheDefcon(c: Concept): Unit = flag = true
-  //  Concept.foreach(isTheDefcon, c)
-  //  flag
-
+  /** Map a function f: Concept => Concept over the given concept, applying it
+    * to all subexpressions. For example, given a union Union(lhs, rhs), the
+    * function would be applied as f(Union(map(f, lhs), map(f, rhs))).
+    */
   def map(f: Concept => Concept, concept: Concept): Concept = concept match
-    case Complement(i)           => f(Complement(map(f, i)))
-    case Existential(r, expr)    => f(Existential(r, map(f, expr)))
-    case Universal(r, expr)      => f(Universal(r, map(f, expr)))
-    case GreaterThan(n, r, expr) => f(GreaterThan(n, r, map(f, expr)))
-    case LessThan(n, r, expr)    => f(LessThan(n, r, map(f, expr)))
-    case Union(lexpr, rexpr)     => f(Union(map(f, lexpr), map(f, rexpr)))
+    case Top                        => f(Top)
+    case Bottom                     => f(Bottom)
+    case n @ NamedConcept(_)        => f(n)
+    case n @ NominalConcept(_)      => f(n)
+    case Complement(c)              => f(Complement(map(f, c)))
+    case Existential(r, expr)       => f(Existential(r, map(f, expr)))
+    case Universal(r, expr)         => f(Universal(r, map(f, expr)))
+    case GreaterThan(n, r, expr)    => f(GreaterThan(n, r, map(f, expr)))
+    case LessThan(n, r, expr)       => f(LessThan(n, r, map(f, expr)))
+    case Exactly(n, r, expr)        => f(Exactly(n, r, map(f, expr)))
+    case Union(lexpr, rexpr)        => f(Union(map(f, lexpr), map(f, rexpr)))
     case Intersection(lexpr, rexpr) =>
       f(Intersection(map(f, lexpr), map(f, rexpr)))
-    case _ => f(concept)
 
-  def foreach(f: Concept => Unit, concept: Concept): Unit = concept match
-    case Complement(i) =>
-      f(concept)
-      foreach(f, i)
-    case Existential(_, expr) =>
-      f(concept)
-      foreach(f, expr)
-    case Universal(_, expr) =>
-      f(concept)
-      foreach(f, expr)
-    case GreaterThan(_, _, expr) =>
-      f(concept)
-      foreach(f, expr)
-    case LessThan(_, _, expr) =>
-      f(concept)
-      foreach(f, expr)
-    case Union(lexpr, rexpr) =>
-      foreach(f, lexpr)
-      foreach(f, rexpr)
-    case Intersection(lexpr, rexpr) =>
-      foreach(f, lexpr)
-      foreach(f, rexpr)
-    case _ => f(concept)
+  /** Apply a procedure proc: Concept => Unit to the given concept, and to all
+    * its components. For example, given a Union(lhs, rhs), it would first apply
+    * proc(Union(lhs, rhs)) and then foreach(proc, lhs); foreach(prof, rhs).
+    */
+  def foreach(proc: Concept => Unit, concept: Concept): Unit =
+    proc(concept)
+    concept match
+      // Nothing to do here.
+      case Top               => ()
+      case Bottom            => ()
+      case NamedConcept(_)   => ()
+      case NominalConcept(_) => ()
+      // Recursively iterate on sub-components.
+      case Complement(i) =>
+        foreach(proc, i)
+      case Existential(_, expr) =>
+        foreach(proc, expr)
+      case Universal(_, expr) =>
+        foreach(proc, expr)
+      case GreaterThan(_, _, expr) =>
+        foreach(proc, expr)
+      case LessThan(_, _, expr) =>
+        foreach(proc, expr)
+      case Exactly(_, _, expr) =>
+        foreach(proc, expr)
+      case Union(lexpr, rexpr) =>
+        foreach(proc, lexpr)
+        foreach(proc, rexpr)
+      case Intersection(lexpr, rexpr) =>
+        foreach(proc, lexpr)
+        foreach(proc, rexpr)
 
+  /** Simplify a Concept fully, according to the equivalency rules implemented
+    * in `equivalentConcept`.
+    */
   def simplify(concept: Concept): Concept =
     val s = equivalentConcept(concept)
     if s == concept then s
     else simplify(s)
 
-  // Equivalence rules for concepts.
+  /** Transform this concept into an equivalent concept by applying a single
+    * equivalency rule.
+    */
   def equivalentConcept(concept: Concept): Concept =
     map(
       {
@@ -215,14 +247,14 @@ object Concept:
               Existential(NamedRole(r2), Top)
             ) if r1 == r2 =>
           Existential(Inverse(NamedRole(r1)), Top)
-        // Union
+        // Union and Intersection
         case Union(expr1, expr2) if expr1 == expr2                    => expr1
         case Intersection(expr1, expr2) if expr1 == expr2             => expr1
         case Intersection(expr1, Complement(expr2)) if expr1 == expr2 => Bottom
         case Intersection(Complement(expr1), expr2) if expr1 == expr2 => Bottom
         case Union(expr1, Complement(expr2)) if expr1 == expr2        => Top
         case Union(Complement(expr1), expr2) if expr1 == expr2        => Top
-        // Negation
+        // Remove double negation.
         case Complement(Complement(expr)) => expr
         // a ^ (a v b) = a
         case Intersection(expr1, Union(expr2, _)) if expr1 == expr2 => expr1
@@ -251,9 +283,3 @@ object Concept:
       },
       concept
     )
-
-//object DefinedConcept:
-//  def orElse(expr: DLExpression, error: SharError): SharTry[DefinedConcept] =
-//    expr match
-//      case dc: DefinedConcept => Right(dc)
-//      case _                  => Left(error)

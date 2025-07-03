@@ -6,7 +6,7 @@ import de.pseifer.shar.core.Iri
 
 import de.pseifer.shar.error._
 
-/** DLExpressions are:
+/** DLExpressions are one of:
   *
   * @see
   *   Concept
