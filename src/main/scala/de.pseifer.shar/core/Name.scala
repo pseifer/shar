@@ -2,12 +2,6 @@ package de.pseifer.shar.core
 
 import java.net.{URI, URISyntaxException, URL}
 
-import scala.util.Try
-
-import de.pseifer.shar.core.BackendState
-import de.pseifer.shar.core.Encodeable
-import de.pseifer.shar.core.XSD
-
 import de.pseifer.shar.error._
 
 /** Defines a Name. A name is either an Iri, Variable, TypedValue or the
@@ -70,7 +64,7 @@ class Iri private (val value: String) extends Name:
 
   /** Get this Iri as a java.net.URL
     */
-  def getURL: URL = URL(getRaw)
+  def getURL: URL = URI(getRaw).toURL()
 
   /** Returns 'true' if this Iri is an XSD datatype.
     */

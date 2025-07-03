@@ -1,7 +1,7 @@
 package de.pseifer.shar.core
 
 import scala.language.implicitConversions
-import scala.util.{Try, Success, Failure}
+import scala.util.{Try, Success}
 
 // Provides implicit conversion to XSD values for supported types.
 implicit def support2XSD(value: Int | Float | Double | String | Boolean): XSD =

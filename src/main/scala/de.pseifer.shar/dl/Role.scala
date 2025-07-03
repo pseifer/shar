@@ -1,6 +1,5 @@
 package de.pseifer.shar.dl
 
-import de.pseifer.shar.core.Encodeable
 import de.pseifer.shar.core.BackendState
 import de.pseifer.shar.core.Iri
 

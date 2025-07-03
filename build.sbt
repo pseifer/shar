@@ -1,9 +1,4 @@
-import NativePackagerHelper._
-
-val scala3Version = "3.3.1"
-
-// Native Packager plugin.
-enablePlugins(JavaAppPackaging)
+val scala3Version = "3.3.6"
 
 lazy val root = project
   .in(file("."))
@@ -11,27 +6,36 @@ lazy val root = project
   .settings(
     // Project metadata.
     name := "shar",
-    maintainer := "github@seifer.me",
-    organization := "de.pseifer",
     version := "1.0.0",
-    // Project settings.
-    run / fork := true,
-    run / outputStrategy := Some(StdoutOutput),
-    run / javaOptions += "-Xmx4G",
-    run / javaOptions += "-Dfile.encoding=UTF-8",
+    organization := "de.pseifer",
+    homepage := Some(url("https://shar.pseifer.de")),
+    startYear := Some(2018),
+    description := "An algebraic Scala wrapper around OWL API",
+    licenses += "GPLv2" -> url("https://www.gnu.org/licenses/gpl-2.0.html"),
     scalaVersion := scala3Version,
-    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
+    scalacOptions ++= Seq(
+      "-encoding",
+      "utf8",
+      "-deprecation",
+      "-feature",
+      "-unchecked",
+      "-language:experimental.macros",
+      "-language:higherKinds",
+      "-language:implicitConversions",
+      "-Wvalue-discard",
+      "-Wnonunit-statement",
+      "-Wunused:implicits",
+      "-Wunused:explicits",
+      "-Wunused:imports",
+      "-Wunused:locals",
+      "-Wunused:params",
+      "-Wunused:privates",
+      "-Xfatal-warnings"
+    ),
     // Settings for Antlr4.
     Antlr4 / antlr4Version := "4.7.2",
     Antlr4 / antlr4GenVisitor := true,
-    // Settings for native packer.
-    Compile / mainClass := Some("de.pseifer.shar.main"),
-    Compile / discoveredMainClasses := Seq(),
-    Universal / mappings += file("README.md") -> "README.md",
-    Universal / packageName := "shar",
-    // Dependencies.
-    // CLI application.
-    libraryDependencies += "org.rogach" %% "scallop" % "4.1.0",
+    // Dependencies
     // OWL-API
     libraryDependencies += "net.sourceforge.owlapi" % "owlapi-api" % "5.1.20",
     // HermiT
@@ -41,7 +45,9 @@ lazy val root = project
       "org.antlr" % "antlr4" % "4.7.2",
       "org.antlr" % "antlr4-runtime" % "4.7.2"
     ),
+    // Runtime dependencies (Logging)
     libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.12" % Runtime,
     // Testing
-    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   )

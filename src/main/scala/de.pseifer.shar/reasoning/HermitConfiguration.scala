@@ -1,8 +1,6 @@
 package de.pseifer.shar.reasoning
 
 import org.semanticweb.HermiT.Configuration
-import org.semanticweb.HermiT.Configuration.TableauMonitorType
-
 import org.semanticweb.HermiT.Configuration.ExistentialStrategyType
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType
 import org.semanticweb.HermiT.Configuration.DirectBlockingType

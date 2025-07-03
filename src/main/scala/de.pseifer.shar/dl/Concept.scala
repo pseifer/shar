@@ -1,9 +1,7 @@
 package de.pseifer.shar.dl
 
-import de.pseifer.shar.core.Encodeable
 import de.pseifer.shar.core.BackendState
 import de.pseifer.shar.core.Iri
-import de.pseifer.shar.reasoning.AxiomSet
 
 import de.pseifer.shar.error._
 

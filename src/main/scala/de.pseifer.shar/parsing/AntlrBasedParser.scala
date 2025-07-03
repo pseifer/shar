@@ -1,6 +1,5 @@
 package de.pseifer.shar.parsing
 
-import de.pseifer.shar.core.Iri
 import de.pseifer.shar.error._
 
 import org.antlr.v4.runtime._

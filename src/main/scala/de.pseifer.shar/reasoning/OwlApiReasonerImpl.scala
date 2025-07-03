@@ -6,15 +6,13 @@ import de.pseifer.shar.core.OntologyInitialization
 import de.pseifer.shar.core.ReasonerInitialization
 import de.pseifer.shar.dl._
 import org.semanticweb.owlapi.apibinding.OWLManager
-import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat 
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat
 import org.semanticweb.owlapi.model._
-import org.semanticweb.owlapi.reasoner.Node
 import org.semanticweb.owlapi.reasoner.OWLReasoner
 import uk.ac.manchester.cs.owl.owlapi.OWLNamedIndividualImpl
 
 import java.io.File
 import scala.jdk.CollectionConverters.SetHasAsJava
-import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration
 
 /** A description logics reasoner using OWL API. */
 abstract class OwlApiReasonerImpl(
@@ -102,7 +100,6 @@ abstract class OwlApiReasonerImpl(
   def saveToFile(file: File): Boolean =
     try {
       file.createNewFile()
-      val iri = IRI.create(file)
       manager.saveOntology(
         ontology,
         OWLXMLDocumentFormat(),
@@ -116,12 +113,12 @@ abstract class OwlApiReasonerImpl(
   def addAxioms(axioms: AxiomSet): Unit =
     if !axioms.isEmpty then
       isFlushed = false
-      manager.addAxioms(ontology, mkAxiomset(axioms).asJava)
+      manager.addAxioms(ontology, mkAxiomset(axioms).asJava): Unit
 
   def removeAxioms(axioms: AxiomSet): Unit =
     if !axioms.isEmpty then
       isFlushed = false
-      manager.removeAxioms(ontology, mkAxiomset(axioms).asJava)
+      manager.removeAxioms(ontology, mkAxiomset(axioms).asJava): Unit
 
   def prove(axiom: Axiom): Boolean =
 

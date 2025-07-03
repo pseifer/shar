@@ -1,12 +1,9 @@
 package de.pseifer.shar.parsing
 
-import de.pseifer.shar.parsing.DescriptionLogicsBaseVisitor
-import de.pseifer.shar.parsing.{DescriptionLogicsLexer, DescriptionLogicsParser}
 import de.pseifer.shar.parsing.DescriptionLogicsParser._
 
-import de.pseifer.shar.core.{Prefix, Iri}
-import de.pseifer.shar.parsing.AntlrBasedParser
-import de.pseifer.shar.reasoning.{DLReasoner, AxiomSet}
+import de.pseifer.shar.core.Iri
+import de.pseifer.shar.reasoning.AxiomSet
 
 import de.pseifer.shar.dl._
 import de.pseifer.shar.error._
@@ -17,7 +14,6 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.language.implicitConversions
 
 import org.antlr.v4.runtime._
-import org.antlr.v4.runtime.tree.{ParseTreeVisitor, ParseTree};
 
 /** Parse a description logics expression to a Concept.
   */
@@ -117,12 +113,12 @@ class ConceptParser(state: BackendState)
     // or it may be a magic scaspa 'defined' concept.
 
     // Magic Shar prefix:
-    //if rawIri.startsWith(Prefix.shar.toString) then
+    // if rawIri.startsWith(Prefix.shar.toString) then
     //  for name <- DefinedName.fromString(rawIri)
     //  yield DefinedConcept(name)
 
     //// Magic Shar IRI:
-    //else if Iri.shar.startOf(rawIri) then
+    // else if Iri.shar.startOf(rawIri) then
     //  for
     //    i <- iri
     //    name <- DefinedName.fromIri(state.prefixes, i)

@@ -1,7 +1,5 @@
 package de.pseifer.shar.core
 
-import de.pseifer.shar.core.BackendState
-
 /** Encodable things can be shown (user end) or stringyfied in to a parseable
   * form.
   */

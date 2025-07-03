@@ -1,13 +1,10 @@
 package de.pseifer.shar.reasoning
 
-import de.pseifer.shar.core.BackendState
 import de.pseifer.shar.core.EmptyInitialization
-import de.pseifer.shar.core.PrefixMapping
 import de.pseifer.shar.core.ReasonerInitialization
 import org.semanticweb.HermiT.Configuration
 import org.semanticweb.HermiT.Configuration.TableauMonitorType
 import org.semanticweb.HermiT.{Reasoner => Hermit}
-import org.semanticweb.owlapi.model._
 
 /** A DL reasoner that uses HermiT internally.
   */

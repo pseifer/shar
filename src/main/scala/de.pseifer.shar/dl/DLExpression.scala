@@ -4,8 +4,6 @@ import de.pseifer.shar.core.Encodeable
 import de.pseifer.shar.core.BackendState
 import de.pseifer.shar.core.Iri
 
-import de.pseifer.shar.error._
-
 /** DLExpressions are one of:
   *
   * @see

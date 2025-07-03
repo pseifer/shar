@@ -12,7 +12,7 @@ import de.pseifer.shar.dl.Axiom
   * @see
   *   Role
   */
-trait DLReasoner(initialization: ReasonerInitialization):
+trait DLReasoner(val initialization: ReasonerInitialization):
 
   /** Prove the axiom 'Axiom'. Optionally accepts a List of additional axioms
     * used as a context. The context is added to the ontology before prooving
