@@ -23,5 +23,8 @@ trait DLReasoner(val initialization: ReasonerInitialization):
   /** Add an axiom set. */
   def addAxioms(axioms: AxiomSet): Unit
 
+  /** Add multiple axioms. */
+  def addAxioms(axioms: Axiom*): Unit = addAxioms(AxiomSet(axioms.toSet))
+
   /** Add a single axiom. */
   def addAxiom(axiom: Axiom): Unit = addAxioms(AxiomSet(Set(axiom)))

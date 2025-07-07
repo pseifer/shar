@@ -6,7 +6,7 @@ import de.pseifer.shar.error._
 
 /** Mapping from Prefix to BaseIri.
   */
-class PrefixMapping:
+class PrefixMapping(val including: (Prefix, Iri)*):
 
   // Defaults + external configuration.
   private var defaults: Map[Prefix, Iri] =
@@ -18,14 +18,13 @@ class PrefixMapping:
       Prefix.sh -> Iri.sh,
       Prefix.ex -> Iri.ex,
       Prefix.shar -> Iri.shar
-    )
+    ) ++ including.toMap
 
   // Initialize the prefix mapping with defaults.
   private var mapping: Map[Prefix, Iri] = defaults
 
   /** Reset the prefix mapping to the defaults.
     */
-
   def reset(): Unit =
     mapping = defaults
 
@@ -58,15 +57,15 @@ class PrefixMapping:
       addDefaults: Boolean = false
   ): SharTry[true] =
     //// Join both mappings.
-    //val s = mapping.toSeq ++ other.mapping.toSeq
+    // val s = mapping.toSeq ++ other.mapping.toSeq
     //// Group again by prefixes, mapping to List of distinct iris.
-    //val t = s.groupBy { case (prefix, iri) => prefix }.view.mapValues { _.map(_._2).distinct }
+    // val t = s.groupBy { case (prefix, iri) => prefix }.view.mapValues { _.map(_._2).distinct }
     //// If there is any list with size > 1 there where conflicting mappings.
-    //if t.values.toList.exists ( _.size > 1 ) then
+    // if t.values.toList.exists ( _.size > 1 ) then
     //  // In this case, there is a dublication error with at least one offender.
     //  val offender = t.filter { (k,v) => v.size > 1 }.keys.head
     //  Left(DublicatePrefixDefinitionError(offender.toString))
-    //else
+    // else
     //  // Otherwise, we can savely merge the mappings.
     //  mapping = mapping ++ other.mapping
     //  Right(true)
@@ -75,7 +74,7 @@ class PrefixMapping:
       yield
         if addDefaults then addToDefaults(prefix, iri)
         else add(prefix, iri)
-    //r.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
+    // r.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
     r.filter(_.isLeft).headOption.getOrElse(Right(true))
 
   /** Add a new prefix, if not already defined (differently).
@@ -93,7 +92,7 @@ class PrefixMapping:
   def addToDefaults(prefix: Prefix, iri: Iri): SharTry[true] =
     add(prefix, iri) match
       case Left(err) => Left(err)
-      case Right(_) =>
+      case Right(_)  =>
         defaults = defaults.updated(prefix, iri)
         Right(true)
 
@@ -196,8 +195,18 @@ class PrefixMapping:
         if addDefaults then pr.map(addToDefaults)
         else pr.map(add)
       // Report (the first) error.
-      //updated.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
+      // updated.collectFirst { case x @ Left(_) => x } getOrElse (Right(true))
       updated.filter(_.isLeft).headOption.getOrElse(Right(true))
 
 object PrefixMapping:
+  /** Get only the default prefixes. */
   def default: PrefixMapping = PrefixMapping()
+
+  /** Initialize a PrefixMapping from a Source. */
+  def fromSource(source: Source): SharTry[PrefixMapping] =
+    val m = PrefixMapping.default
+    m.addFromSource(source).map(_ => m)
+
+  /** Initialize a PrefixMapping from a Map. */
+  def fromMap(map: Map[Prefix, Iri]): PrefixMapping =
+    PrefixMapping(map.toSeq: _*)

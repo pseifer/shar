@@ -21,6 +21,14 @@ case class AxiomParseError(reason: String = "")
 object AxiomParseError:
   def format(reason: String) = reason
 
+/** A generic parsing error.
+  */
+case class GenericParseError(reason: String = "")
+    extends ParseError(GenericParseError.format(reason))
+
+object GenericParseError:
+  def format(reason: String) = reason
+
 /*
  *
 /**
