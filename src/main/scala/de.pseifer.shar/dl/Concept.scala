@@ -100,7 +100,7 @@ final case class GreaterThan(n: Int, role: Role, rhs: Concept) extends Concept:
     "≥" ++ n.toString ++ " " ++ left ++ ".(" + right + ")"
 
   override def concepts: Set[Iri] = rhs.concepts
-  override def properties: Set[Iri] = role.properties
+  override def properties: Set[Iri] = role.properties.union(rhs.properties)
 
 /** A qualified number restriction, requiring at most n role names r to the
   * concept C, printing as <=n r.C.
